@@ -152,7 +152,7 @@
         }
 
         .text-glow {
-            text-shadow: 0 0 20px rgba(6, 182, 212, 0.8), 0 0 40px rgba(6, 182, 212, 0.4);
+            text-shadow: 0 0 10px rgba(6, 182, 212, 0.8), 0 0 40px rgba(6, 182, 212, 0.4);
         }
 
         .salary-badge {
@@ -160,7 +160,6 @@
             box-shadow: 0 0 20px rgba(251, 191, 36, 0.4);
         }
 
-        /* 曲線圖動畫特效 */
         .path-animate {
             stroke-dasharray: 1000;
             stroke-dashoffset: 1000;
@@ -179,6 +178,20 @@
             0%, 100% { filter: drop-shadow(0 0 2px var(--gold-glow)); transform: scale(1); }
             50% { filter: drop-shadow(0 0 8px var(--gold-glow)); transform: scale(1.2); }
         }
+
+        /* 載入中動畫 */
+        .loading-spinner {
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top: 3px solid #fff;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+            margin-right: 10px;
+            vertical-align: middle;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
 <body class="antialiased">
@@ -200,11 +213,8 @@
                     <a href="#rejoin" class="text-cyan-400">回巢入口</a>
                 </div>
             </div>
-            <div class="flex items-center gap-4">
-                <div class="flex items-center gap-2 px-3 py-1 bg-white/5 rounded-full border border-white/10">
-                    <span class="text-[10px] font-mono text-slate-400">PLATFORM:</span>
-                    <span class="text-[10px] font-bold text-rose-500 uppercase">gratus</span>
-                </div>
+            <div class="flex items-center gap-4 text-[10px] font-bold text-rose-500 uppercase">
+                gratus x NeoDerm
             </div>
         </div>
     </nav>
@@ -215,15 +225,12 @@
             <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-cyan-500/30 bg-cyan-500/5 text-[10px] font-mono text-cyan-400 mb-10 tracking-[0.2em] mx-auto uppercase">
                 Realistic AI Persona Vise Connected
             </div>
-            
             <h1 class="text-7xl md:text-9xl font-black mb-6 tracking-tighter leading-none text-white text-glow">
                 重回 NEO DERM
             </h1>
-            
             <h2 class="text-4xl md:text-6xl font-black mb-10 tracking-tight leading-tight">
                 <span class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-blue-500 to-indigo-500">啟動 AI 助手 Vise</span>
             </h2>
-
             <p class="text-slate-400 text-lg md:text-xl max-w-4xl mx-auto font-light leading-relaxed">
                 與真實感 AI 助手 Vise 並肩運作。她以強大的運算力，為您打理繁雜行政細節，每日提醒是日預約。提示每位客人療程隔段日期，提示客人所需要療程及過往消費模式。<br class="hidden md:block"/>
                 讓您只需專注於美學專業，成就 Beauty Together！
@@ -238,7 +245,7 @@
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
                 <div class="space-y-6">
                     <h2 class="text-xs font-mono text-cyan-500 uppercase tracking-[0.4em]">01 // GROUP_EVOLUTION</h2>
-                    <h3 class="text-4xl font-bold text-white tracking-tight">數位轉型領航：NEO DERM x gratus</h3>
+                    <h3 class="text-4xl font-bold text-white tracking-tight text-glow">數位轉型領航：NEO DERM x gratus</h3>
                     <p class="text-slate-400 leading-relaxed text-lg">
                         NEO DERM 集團已全面對接 **gratus** 智慧平台。我們的目標是賦能每一位治療師成為專業的「數碼化美容師」，透過 AI Vise 的數據洞察與 iConnect 的串聯，打造無縫的美學體驗。
                     </p>
@@ -253,34 +260,25 @@
                         </div>
                     </div>
                 </div>
-                <div class="relative group flex justify-center">
-                    <div class="absolute -inset-1 bg-gradient-to-r from-rose-500 to-blue-600 rounded-3xl blur opacity-25 group-hover:opacity-50 transition duration-1000"></div>
-                    <div class="relative glass-card rounded-3xl overflow-hidden aspect-[16/10] bg-slate-900 w-full flex items-center justify-center">
-                        <div class="text-center px-10">
-                            <div class="text-rose-500 font-black text-6xl italic mb-2 tracking-tighter">gratus</div>
-                            <div class="text-white text-xl font-bold uppercase tracking-widest">醫美小店</div>
-                            <p class="text-[10px] font-mono text-cyan-400 mt-4">滿足各種醫美需要 - Beauty Together!</p>
-                        </div>
+                <div class="relative group aspect-[16/10] bg-slate-900 rounded-3xl flex items-center justify-center overflow-hidden border border-white/10">
+                    <div class="text-center px-10">
+                        <div class="text-rose-500 font-black text-6xl italic mb-2 tracking-tighter">gratus</div>
+                        <div class="text-white text-xl font-bold uppercase tracking-widest">醫美小店</div>
+                        <p class="text-[10px] font-mono text-cyan-400 mt-4">滿足各種醫美需要 - Beauty Together!</p>
                     </div>
                 </div>
             </div>
         </section>
 
-        <!-- Section 2: AI Assistant Vise -->
+        <!-- Section 2: AI Vise -->
         <section id="ai-vise" class="scroll-mt-24">
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
                 <div class="order-2 lg:order-1 relative flex justify-center">
                     <div class="vise-avatar-wrapper ai-pulse">
-                        <div class="vise-image-circle">
-                            <!--  -->
-                            <img src="" alt="AI 助手 Vise" class="vise-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'">
-                            <div style="display:none;" class="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-slate-800 to-slate-950 text-center">
-                                <span class="text-5xl mb-2 text-cyan-400">Vise</span>
-                                <span class="text-[9px] font-mono text-cyan-500/50 uppercase">Visual_Intelligence</span>
-                            </div>
+                        <div class="vise-image-circle flex items-center justify-center bg-slate-800">
+                            <span class="text-6xl text-white">👩‍💻</span>
                         </div>
-                        <div class="vise-name-tag uppercase">AI Assistant Vise</div>
-                        
+                        <div class="vise-name-tag uppercase text-glow">AI Assistant Vise</div>
                         <div class="floating-notif top-0 -left-12 shadow-2xl">
                             <span class="text-rose-500 text-lg">🎂</span>
                             <span>生日祝福已預約發送</span>
@@ -321,7 +319,7 @@
                                 <svg class="w-7 h-7 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
                             </div>
                             <div>
-                                <h4 class="text-white font-bold text-xl">業績管理 (Real-time Performance)</h4>
+                                <h4 class="text-white font-bold text-xl text-glow">業績管理 (Real-time Performance)</h4>
                                 <p class="text-sm text-slate-500 mt-1">實時追蹤個人與小店業績數據，AI 提供即時轉化方案達成目標。</p>
                             </div>
                         </li>
@@ -330,156 +328,107 @@
             </div>
         </section>
 
-        <!-- Section 3: Salary & Benefits (Position Updated & Line Chart Added) -->
+        <!-- Section 3: Salary -->
         <section id="salary" class="scroll-mt-24">
             <div class="glass-card rounded-[3.5rem] p-12 md:p-20 relative overflow-hidden border-yellow-500/30">
                 <div class="absolute top-0 right-0 p-12 opacity-10">
                     <svg class="w-48 h-48 text-yellow-500" fill="currentColor" viewBox="0 0 20 20"><path d="M8.433 7.418c.155-.103.346-.196.567-.267v1.698a2.305 2.305 0 01-.567-.267C8.07 8.34 8 8.114 8 8c0-.114.07-.34.433-.582zM11 12.849v-1.698c.22.071.412.164.567.267.364.243.433.468.433.582 0 .114-.07.34-.433.582a2.305 2.305 0 01-.567.267z"/><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-13a1 1 0 10-2 0v.092a4.535 4.535 0 00-1.676.662C6.602 6.234 6 7.009 6 8c0 .99.602 1.765 1.324 2.246.48.32 1.054.545 1.676.662v1.941c-.391-.127-.68-.317-.843-.504a1 1 0 10-1.514 1.31c.356.412.96.813 1.746 1.051V15a1 1 0 102 0v-.092a4.535 4.535 0 001.676-.662C13.398 13.766 14 12.991 14 12c0-.99-.602-1.765-1.324-2.246A4.535 4.535 0 0011 9.092V7.151c.391.127.68.317.843.504a1 1 0 101.514-1.31c-.356-.412-.96-.813-1.746-1.051V5z" clip-rule="evenodd"/></svg>
                 </div>
                 
-                <!-- Improved alignment for the 50k box -->
                 <div class="relative z-10 flex flex-col lg:flex-row gap-12 items-center mb-24">
-                    <div class="flex-1">
-                        <h2 class="text-xs font-mono text-yellow-500 uppercase tracking-[0.4em] mb-4">03 // EXCLUSIVE_REJOIN_BENEFITS</h2>
-                        <h3 class="text-4xl font-bold text-white mb-6">精英回巢：薪資保障方案</h3>
-                        <p class="text-slate-300 text-lg leading-relaxed mb-8">
-                            我們重視每一位曾與 NEO DERM 並肩作戰的精英。針對重返大家庭的同事，我們提供極具競爭力的薪酬包，助您無憂重啟專業航道。
+                    <div class="flex-1 space-y-6">
+                        <h2 class="text-xs font-mono text-yellow-500 uppercase tracking-[0.4em]">03 // EXCLUSIVE_BENEFITS</h2>
+                        <h3 class="text-4xl font-bold text-white tracking-tight text-glow">精英回巢：薪資保障方案</h3>
+                        <p class="text-slate-300 text-lg leading-relaxed">
+                            重視每一位曾並肩作戰的精英。我們提供有條件包薪優待，助您無憂重啟專業航道。
                         </p>
                         <div class="flex items-center gap-4 bg-white/5 p-5 rounded-2xl border border-white/10">
-                            <div class="salary-badge p-3 rounded-xl shrink-0">
-                                <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04M12 21a9.003 9.003 0 008.367-5.637m-1.422-3.083a4.423 4.423 0 01-1.589-3.395L12 11l-5.356-3.115a4.423 4.423 0 01-1.589 3.395m1.422 3.083a9.003 9.003 0 01-8.367 5.637"/></svg>
-                            </div>
+                            <div class="salary-badge p-3 rounded-xl shrink-0"><span class="text-white font-black text-xl px-1">START</span></div>
                             <div>
-                                <h4 class="text-yellow-500 font-bold text-lg">有條件包薪優待 (Conditional Guarantee)</h4>
-                                <p class="text-sm text-slate-400">專為符合資格的回巢成員量身定制的薪資保障。</p>
+                                <h4 class="text-yellow-500 font-bold text-lg">最高月薪包薪可達 HKD 50,000+</h4>
+                                <p class="text-sm text-slate-400">根據職位及過往糧單提供市場領先保障。</p>
                             </div>
                         </div>
                     </div>
-                    
-                    <!-- Repositioned 50k highlight box -->
                     <div class="shrink-0">
-                        <div class="inline-block glass-card p-10 rounded-[3rem] border-yellow-500/40 shadow-[0_0_60px_rgba(251,191,36,0.2)] transform lg:-translate-y-4">
-                            <div class="text-[80px] font-black text-white leading-none mb-2 tracking-tighter">50,000+</div>
-                            <div class="text-yellow-500 font-mono text-sm tracking-[0.3em] uppercase">Guarantee_Base_Start</div>
-                            <div class="h-1 w-full bg-gradient-to-r from-transparent via-yellow-500 to-transparent my-6"></div>
-                            <p class="text-slate-300 text-xs font-bold">根據職位及過往糧單提供保障</p>
+                        <div class="inline-block glass-card p-10 rounded-[3rem] border-yellow-500/40 shadow-[0_0_60px_rgba(251,191,36,0.2)] transform lg:-translate-y-6 transition-transform">
+                            <div class="text-[80px] font-black text-white leading-none mb-2 tracking-tighter text-glow">50,000+</div>
+                            <div class="text-yellow-500 font-mono text-sm tracking-[0.3em] uppercase text-center">Guarantee_Base</div>
                         </div>
                     </div>
                 </div>
 
-                <!-- NEW: Line Chart Graphic (More Sales = More Package up to 80K) -->
                 <div class="relative bg-slate-900/40 rounded-[2.5rem] p-10 border border-white/5">
-                    <div class="flex items-center justify-between mb-10">
-                        <div class="flex items-center gap-3">
-                            <div class="w-1.5 h-6 bg-yellow-500 rounded-full"></div>
-                            <h4 class="text-white font-bold text-xl uppercase tracking-wider">Salary Growth Potential</h4>
-                        </div>
-                        <div class="px-4 py-1 bg-yellow-500/10 border border-yellow-500/30 rounded-full text-yellow-500 font-mono text-[10px] uppercase">Peak: 80,000 HKD</div>
-                    </div>
-                    
+                    <div class="flex items-center justify-between mb-10 font-bold text-white uppercase tracking-wider">Salary Growth Potential (Max 80K)</div>
                     <div class="relative h-64 w-full">
-                        <!-- Chart Grid lines -->
-                        <div class="absolute inset-0 flex flex-col justify-between opacity-10">
-                            <div class="w-full border-t border-white"></div>
-                            <div class="w-full border-t border-white"></div>
-                            <div class="w-full border-t border-white"></div>
-                            <div class="w-full border-t border-white"></div>
-                        </div>
-                        
-                        <!-- SVG Line Chart -->
                         <svg viewBox="0 0 1000 400" class="absolute inset-0 w-full h-full">
-                            <!-- Gradient Area -->
                             <defs>
                                 <linearGradient id="chartGradient" x1="0" y1="0" x2="0" y2="1">
                                     <stop offset="0%" stop-color="var(--gold-glow)" stop-opacity="0.3" />
                                     <stop offset="100%" stop-color="var(--cyber-blue)" stop-opacity="0" />
                                 </linearGradient>
                             </defs>
-                            
-                            <!-- Area under the curve -->
                             <path d="M0,350 C200,340 400,280 600,180 C800,80 900,50 1000,50 L1000,400 L0,400 Z" fill="url(#chartGradient)" />
-                            
-                            <!-- The actual curve -->
-                            <path d="M0,350 C200,340 400,280 600,180 C800,80 900,50 1000,50" 
-                                  fill="none" 
-                                  stroke="var(--gold-glow)" 
-                                  stroke-width="6" 
-                                  stroke-linecap="round"
-                                  class="path-animate" />
-                            
-                            <!-- Highlighting points -->
-                            <circle cx="0" cy="350" r="8" fill="var(--cyber-blue)" />
+                            <path d="M0,350 C200,340 400,280 600,180 C800,80 900,50 1000,50" fill="none" stroke="var(--gold-glow)" stroke-width="6" stroke-linecap="round" class="path-animate" />
                             <circle cx="1000" cy="50" r="10" fill="var(--gold-glow)" class="point-glow" />
-                            
-                            <!-- Label over the 80k peak -->
-                            <text x="920" y="35" fill="var(--gold-glow)" font-size="28" font-weight="900" font-family="JetBrains Mono">MAX: 80K</text>
-                            <text x="20" y="340" fill="var(--cyber-blue)" font-size="24" font-weight="700" font-family="JetBrains Mono">BASE: 50K</text>
+                            <text x="900" y="40" fill="var(--gold-glow)" font-size="28" font-weight="900" font-family="JetBrains Mono">MAX: 80K</text>
+                            <text x="20" y="340" fill="var(--cyber-blue)" font-size="24" font-weight="700" font-family="JetBrains Mono">50K</text>
                         </svg>
                     </div>
-                    
-                    <div class="flex justify-between mt-6 px-2">
-                        <div class="text-[11px] font-mono text-slate-500 uppercase tracking-[0.2em]">銷售額 (Sales Amount) →</div>
-                        <div class="text-right text-[11px] font-mono text-yellow-500 uppercase tracking-[0.2em] font-bold">晉升 Platinum 保障級別</div>
-                    </div>
+                    <div class="flex justify-between mt-6 text-[11px] font-mono text-slate-500 uppercase tracking-widest">銷售業績 (Sales Performance) →</div>
                 </div>
             </div>
         </section>
 
         <!-- Section 4: Rejoin Form -->
         <section id="rejoin" class="scroll-mt-24">
-            <div class="text-center mb-16">
-                <h2 class="text-xs font-mono text-cyan-500 uppercase tracking-[0.4em] mb-4">04 // REJOIN_AUTHENTICATION_SYSTEM</h2>
+            <div class="text-center mb-16 px-4">
+                <h2 class="text-xs font-mono text-cyan-500 uppercase tracking-[0.4em] mb-4">04 // REJOIN_PORTAL</h2>
                 <h3 class="text-4xl font-bold text-white tracking-tight mb-4 text-glow">重啟您的「數碼化美容師」標籤</h3>
-                <div class="max-w-3xl mx-auto space-y-4 px-4 text-center">
-                    <p class="text-cyan-400 text-lg font-bold leading-relaxed">
-                        精英重返 (Rejoiner) 專屬方案：重新獲分派您以往建立的專屬客戶群組。
-                    </p>
-                    <p class="text-slate-400 leading-relaxed">
-                        AI 助手 Vise 將全力協助您 **重新啟動 (Reactivate)** 這些寶貴客源。透過精準的數據分析與自動提醒，助您重返崗位即刻對接業績，實現無縫接軌！
-                    </p>
+                <div class="max-w-3xl mx-auto space-y-4">
+                    <p class="text-cyan-400 text-lg font-bold">Rejoiner 專屬：重新獲分派您以往建立的專屬客戶群組。</p>
+                    <p class="text-slate-400 leading-relaxed font-light">AI 助手 Vise 將協助您重新啟動 (Reactivate) 客源，助您重返崗位即刻對接業績，實現無縫接軌！</p>
                 </div>
             </div>
 
-            <form id="rejoinForm" class="glass-card rounded-[3.5rem] overflow-hidden border border-blue-500/20">
+            <!-- 表單設定為發送至 kelvin.lin@hotmail.com -->
+            <form id="rejoinForm" class="glass-card rounded-[3.5rem] overflow-hidden border border-blue-500/20" action="https://formspree.io/f/kelvin.lin@hotmail.com" method="POST">
                 <div class="p-8 md:p-16 border-b border-white/5 bg-white/5 text-center">
-                    <p class="text-[10px] font-mono text-slate-500 uppercase tracking-[0.4em] mb-12">Select_Former_Affiliation</p>
+                    <p class="text-[10px] font-mono text-slate-500 uppercase tracking-[0.4em] mb-12">Select_Brand_Legacy</p>
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                         <button type="button" class="brand-card p-14 rounded-[2.5rem] text-center group" onclick="selectBrand('dermes', this)">
-                            <div class="text-3xl font-black mb-2 text-white group-hover:text-cyan-400 transition-colors tracking-tighter">dermes</div>
-                            <div class="text-[10px] font-mono text-slate-500 uppercase tracking-widest">Laser_Expert.sys</div>
+                            <div class="text-3xl font-black mb-2 text-white group-hover:text-cyan-400 transition-colors">dermes</div>
                         </button>
                         <button type="button" class="brand-card p-14 rounded-[2.5rem] text-center group" onclick="selectBrand('reenex', this)">
-                            <div class="text-3xl font-black mb-2 text-white group-hover:text-blue-400 transition-colors tracking-tighter">reenex</div>
-                            <div class="text-[10px] font-mono text-slate-500 uppercase tracking-widest">Collagen_Regen.sys</div>
+                            <div class="text-3xl font-black mb-2 text-white group-hover:text-blue-400 transition-colors">reenex</div>
                         </button>
                         <button type="button" class="brand-card p-14 rounded-[2.5rem] text-center group" onclick="selectBrand('elyze', this)">
-                            <div class="text-3xl font-black mb-2 text-white group-hover:text-indigo-400 transition-colors tracking-tighter">elyze</div>
-                            <div class="text-[10px] font-mono text-slate-500 uppercase tracking-widest">Body_Sculpt.sys</div>
+                            <div class="text-3xl font-black mb-2 text-white group-hover:text-indigo-400 transition-colors">elyze</div>
                         </button>
                     </div>
-                    <input type="hidden" id="selectedBrand" required>
+                    <input type="hidden" id="selectedBrand" name="品牌首選" required>
                 </div>
 
-                <div class="p-8 md:p-16 grid grid-cols-1 md:grid-cols-2 gap-12">
+                <div class="p-8 md:p-16 grid grid-cols-1 md:grid-cols-2 gap-12 text-left">
                     <div class="space-y-10">
                         <div class="space-y-3">
-                            <label class="text-[11px] font-mono text-slate-400 uppercase tracking-[0.3em] ml-1">Identity: Member_Name (EN)</label>
-                            <input type="text" placeholder="Full Name" class="w-full px-7 py-5 rounded-3xl digital-input" required>
+                            <label class="text-[11px] font-mono text-slate-400 uppercase tracking-widest ml-1">Identity: Member_Name (EN)</label>
+                            <input type="text" name="英文姓名" placeholder="Full Name" class="w-full px-7 py-5 rounded-3xl digital-input" required>
                         </div>
                         <div class="space-y-3">
-                            <label class="text-[11px] font-mono text-slate-400 uppercase tracking-[0.3em] ml-1">Comm: Contact_Number</label>
-                            <input type="tel" placeholder="+852 Mobile Number" class="w-full px-7 py-5 rounded-3xl digital-input" required>
+                            <label class="text-[11px] font-mono text-slate-400 uppercase tracking-widest ml-1">Comm: Contact_Number</label>
+                            <input type="tel" name="聯絡電話" placeholder="+852 Mobile Number" class="w-full px-7 py-5 rounded-3xl digital-input" required>
                         </div>
                     </div>
                     <div class="space-y-10">
                         <div class="space-y-3">
-                            <label class="text-[11px] font-mono text-slate-400 uppercase tracking-[0.3em] ml-1">Auth: Staff_ID (4-5 Digits)</label>
-                            <input type="text" maxlength="5" pattern="\d{4,5}" placeholder="例如: 12345" class="w-full px-7 py-5 rounded-3xl digital-input" required>
-                            <p class="text-[9px] text-slate-500 font-mono mt-2 italic tracking-wide">數字格式：4 或 5 位員編 (不含字母前綴)</p>
+                            <label class="text-[11px] font-mono text-slate-400 uppercase tracking-widest ml-1">Auth: Staff_ID (4-5 Digits)</label>
+                            <input type="text" name="員工編號" maxlength="5" pattern="\d{4,5}" placeholder="例如: 12345" class="w-full px-7 py-5 rounded-3xl digital-input" required>
+                            <p class="text-[9px] text-slate-500 font-mono mt-2 italic tracking-wide">Numbers only. No prefix.</p>
                         </div>
                         <div class="space-y-3">
-                            <label class="text-[11px] font-mono text-slate-400 uppercase tracking-[0.3em] ml-1">Archive: Previous_Function</label>
-                            <select class="w-full px-7 py-5 rounded-3xl digital-input appearance-none">
+                            <label class="text-[11px] font-mono text-slate-400 uppercase tracking-widest ml-1">Archive: Previous_Function</label>
+                            <select name="過往職位" class="w-full px-7 py-5 rounded-3xl digital-input appearance-none">
                                 <option>Therapist / 治療師</option>
                                 <option>Consultant / 顧問</option>
                                 <option>Shop Manager / 經理</option>
@@ -489,12 +438,10 @@
                 </div>
 
                 <div class="p-12 md:p-20 text-center bg-white/5 border-t border-white/5">
-                    <button type="submit" class="w-full md:w-auto px-24 py-7 rounded-full bg-gradient-to-r from-rose-600 via-blue-600 to-cyan-500 text-white font-bold text-sm uppercase tracking-[0.6em] hover:scale-105 active:scale-95 transition-all shadow-[0_0_50px_rgba(6,182,212,0.3)]">
+                    <button type="submit" id="submitBtn" class="w-full md:w-auto px-24 py-7 rounded-full bg-gradient-to-r from-rose-600 via-blue-600 to-cyan-500 text-white font-bold text-sm uppercase tracking-[0.6em] transition-all hover:scale-105 active:scale-95 shadow-[0_0_50px_rgba(6,182,212,0.3)]">
                         Initiate_Vise_Protocol
                     </button>
-                    <p class="mt-10 text-[9px] font-mono text-slate-600 uppercase tracking-[0.5em]">
-                        Cloud-Ecosystem Sync Status: Awaiting_Data_Packet...
-                    </p>
+                    <p class="mt-10 text-[9px] font-mono text-slate-600 uppercase tracking-[0.4em]">Data will be securely sent to Kelivn Lin / NeoDerm Group</p>
                 </div>
             </form>
         </section>
@@ -504,30 +451,20 @@
     <div id="successModal" class="fixed inset-0 bg-slate-950/98 backdrop-blur-3xl z-[100] hidden items-center justify-center p-4">
         <div class="glass-card rounded-[4rem] p-16 max-w-lg w-full text-center border-rose-500/40">
             <div class="w-32 h-32 bg-cyan-500/10 rounded-full flex items-center justify-center mx-auto mb-10 border border-cyan-500/30 ai-pulse overflow-hidden">
-                <span class="text-6xl text-white text-glow">🤖</span>
+                <span class="text-6xl text-white">🤖</span>
             </div>
-            <h3 class="text-3xl font-black text-white mb-6 tracking-tighter uppercase">Sync_Successful</h3>
-            <p class="text-slate-400 font-light mb-12 leading-relaxed text-lg">
-                您的專業標籤已成功與 Vise AI 系統同步。<br/>
-                我們將根據您的 Staff ID 核實身份，Vise 很快就會與您聯繫。
+            <h3 class="text-3xl font-black text-white mb-6 uppercase tracking-tighter">Sync_Successful</h3>
+            <p class="text-slate-400 leading-relaxed text-lg font-light">
+                您的專業檔案已成功提交。資料將發送至人力資源部核實，AI 助手 Vise 很快會與您取得聯繫。
             </p>
-            <button onclick="closeModal()" class="w-full bg-cyan-500 text-slate-900 font-black py-6 rounded-full uppercase text-xs tracking-[0.5em] hover:bg-white transition-colors shadow-2xl">
+            <button onclick="closeModal()" class="mt-10 w-full bg-cyan-500 text-slate-900 font-black py-6 rounded-full uppercase text-xs tracking-[0.5em] hover:bg-white transition-colors shadow-2xl">
                 Return_To_Base
             </button>
         </div>
     </div>
 
-    <footer class="py-24 border-t border-white/5 bg-slate-950">
-        <div class="max-w-7xl mx-auto px-4 text-center">
-            <div class="flex flex-wrap justify-center gap-12 text-[10px] font-mono text-slate-500 mb-14 uppercase tracking-[0.4em]">
-                <a href="#" class="hover:text-rose-400 transition-colors">gratus_Protocol</a>
-                <a href="#" class="hover:text-cyan-400 transition-colors">Vise_AI_EULA</a>
-                <a href="#" class="hover:text-white transition-colors">Careers_Center</a>
-            </div>
-            <p class="text-[9px] font-mono text-slate-800 uppercase tracking-[0.8em]">
-                System Architecture by NEO DERM x Vise AI © 2026 | Beauty_Together
-            </p>
-        </div>
+    <footer class="py-24 border-t border-white/5 bg-slate-950 text-center">
+        <p class="text-[9px] font-mono text-slate-800 uppercase tracking-[0.8em] font-bold">NEO DERM x Vise AI © 2026 | Beauty_Together</p>
     </footer>
 
     <script>
@@ -539,20 +476,45 @@
 
         const form = document.getElementById('rejoinForm');
         const modal = document.getElementById('successModal');
+        const submitBtn = document.getElementById('submitBtn');
 
-        form.addEventListener('submit', (e) => {
+        // 使用 AJAX 提交表單，實現不刷新頁面的彈窗體驗
+        form.addEventListener('submit', async (e) => {
             e.preventDefault();
             if (!document.getElementById('selectedBrand').value) {
-                alert("SYSTEM_ALERT: Please select legacy brand tag to proceed.");
+                alert("SYSTEM_ALERT: 請先選擇您之前所屬的品牌旗標。");
                 return;
             }
-            modal.style.display = 'flex';
+
+            submitBtn.disabled = true;
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<span class="loading-spinner"></span>處理中...';
+
+            const data = new FormData(form);
+            try {
+                const response = await fetch(form.action, {
+                    method: 'POST',
+                    body: data,
+                    headers: { 'Accept': 'application/json' }
+                });
+                
+                if (response.ok) {
+                    modal.style.display = 'flex';
+                    form.reset();
+                    document.querySelectorAll('.brand-card').forEach(card => card.classList.remove('selected'));
+                } else {
+                    alert("提交過程中出現錯誤，請檢查您的網絡或稍後再試。");
+                }
+            } catch (error) {
+                alert("發送失敗：無法連接到伺服器。");
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalText;
+            }
         });
 
         function closeModal() {
             modal.style.display = 'none';
-            form.reset();
-            document.querySelectorAll('.brand-card').forEach(card => card.classList.remove('selected'));
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
     </script>

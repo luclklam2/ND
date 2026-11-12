@@ -5,30 +5,38 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
   <title>CB Robotic Activation Performance</title>
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="styles.css?v=2">
   <script defer src="vendor/xlsx.full.min.js"></script>
-  <script defer src="app.js"></script>
+  <script defer src="app.js?v=2"></script>
 </head>
 <body>
   <main>
     <header>
       <h1>CB Robotic Activation Performance</h1>
-      <p>分別上載兩個時段嘅 Excel。21:30 沿用 18:00 嘅分母。</p>
+      <p>分別上載三份 Excel。今日 21:30 沿用今日 18:30 嘅分母。</p>
     </header>
     <section class="uploads" aria-label="上載 Excel">
+      <div class="upload" data-slot="previous">
+        <h2>T-1 21:30</h2>
+        <input type="file" id="previous-file" accept=".xlsx,.xls" aria-label="上載 T-1 21:30 Excel">
+        <label class="file-button" for="previous-file">上載 Excel</label>
+        <button type="button" class="clear" aria-label="清除 T-1 21:30" hidden>清除</button>
+        <p class="file-status" role="status">未上載</p>
+        <p class="file-error" role="alert" hidden></p>
+      </div>
       <div class="upload" data-slot="early">
-        <h2>18:00</h2>
-        <input type="file" id="early-file" accept=".xlsx,.xls" aria-label="上載 18:00 Excel">
+        <h2>Today 18:30</h2>
+        <input type="file" id="early-file" accept=".xlsx,.xls" aria-label="上載今日 18:30 Excel">
         <label class="file-button" for="early-file">上載 Excel</label>
-        <button type="button" class="clear" hidden>清除 18:00</button>
+        <button type="button" class="clear" aria-label="清除今日 18:30" hidden>清除</button>
         <p class="file-status" role="status">未上載</p>
         <p class="file-error" role="alert" hidden></p>
       </div>
       <div class="upload" data-slot="late">
-        <h2>21:30</h2>
-        <input type="file" id="late-file" accept=".xlsx,.xls" aria-label="上載 21:30 Excel">
+        <h2>Today 21:30</h2>
+        <input type="file" id="late-file" accept=".xlsx,.xls" aria-label="上載今日 21:30 Excel">
         <label class="file-button" for="late-file">上載 Excel</label>
-        <button type="button" class="clear" hidden>清除 21:30</button>
+        <button type="button" class="clear" aria-label="清除今日 21:30" hidden>清除</button>
         <p class="file-status" role="status">未上載</p>
         <p class="file-error" role="alert" hidden></p>
       </div>
@@ -38,16 +46,22 @@
         <colgroup span="1"></colgroup>
         <colgroup span="2"></colgroup>
         <colgroup span="2"></colgroup>
+        <colgroup span="2"></colgroup>
         <thead>
-          <tr><th rowspan="2" scope="col">品牌</th><th colspan="2" scope="colgroup">18:00</th><th colspan="2" scope="colgroup">21:30</th></tr>
-          <tr><th scope="col">ACB</th><th scope="col">ICB</th><th scope="col">ACB</th><th scope="col">ICB</th></tr>
+          <tr>
+            <th rowspan="2" scope="col">品牌</th>
+            <th colspan="2" scope="colgroup"><span>T-1</span> 21:30</th>
+            <th colspan="2" scope="colgroup"><span>Today</span> 18:30</th>
+            <th colspan="2" scope="colgroup"><span>Today</span> 21:30</th>
+          </tr>
+          <tr><th scope="col">ACB</th><th scope="col">ICB</th><th scope="col">ACB</th><th scope="col">ICB</th><th scope="col">ACB</th><th scope="col">ICB</th></tr>
         </thead>
         <tbody id="results-body"></tbody>
       </table>
       <div class="summary">
-        <p id="comparison-note">黃色數字顯示 21:30 比 18:00 嘅分子變化。</p>
+        <p id="comparison-note">兩組黃色數字都顯示今日較 T-1 21:30 嘅分子變化。</p>
         <div class="combined">
-          <span>21:30 ACB + ICB Robotic</span>
+          <span>Today 21:30 ACB + ICB Robotic</span>
           <strong id="combined-value">—</strong>
         </div>
       </div>

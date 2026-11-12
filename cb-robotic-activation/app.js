@@ -4,10 +4,10 @@ const brands = ["Dermes", "Elyze", "Reenex"];
 const metrics = ["acb", "icb"];
 const numeratorKeys = ["acb_with_robotic", "segment_c_with_robotic", "other_icb_with_robotic"];
 const denominatorKeys = ["acb", "segment_c", "other_icb"];
-const storageKey = "nd.cb-robotic-activation.v1";
+const storageKey = "nd.cb-robotic-activation.v2";
 const format = new Intl.NumberFormat("en-HK");
-const slots = { early: null, late: null };
-const requestId = { early: 0, late: 0 };
+const slots = { previous: null, early: null, late: null };
+const requestId = { previous: 0, early: 0, late: 0 };
 
 function headerKey(value) {
   return String(value ?? "").trim().toLowerCase().replace(/[\s-]+/g, "_");
@@ -44,7 +44,9 @@ function aggregateWorkbook(bytes, slot) {
   if (matches.length === 0) throw new Error("搵唔到所需 Excel 欄位（" + required.join(", ") + "）。");
   if (matches.length > 1) throw new Error("有多個分頁符合格式。請上載只包含一個數據分頁嘅 Excel。");
   const { name, sheet, range, header, columns } = matches[0];
-  if (required.some(key => columns.indexOf(key) !== columns.lastIndexOf(key))) {
+  const hasBase = slot === "early" || (slot === "previous" && denominatorKeys.every(key => columns.includes(key)));
+  const usedKeys = hasBase && slot === "previous" ? [...required, ...denominatorKeys] : required;
+  if (usedKeys.some(key => columns.indexOf(key) !== columns.lastIndexOf(key))) {
     throw new Error("Excel 有重複欄名，請核對後再上載。");
   }
   const rows = XLSX.utils.sheet_to_json(sheet, {
@@ -52,10 +54,10 @@ function aggregateWorkbook(bytes, slot) {
     range: { s: { r: range.s.r + header + 1, c: range.s.c }, e: range.e },
   });
   const values = Object.fromEntries(brands.map(brand => [brand, {
-    acb: 0, icb: 0, ...(slot === "early" ? { acbBase: 0, icbBase: 0 } : {}),
+    acb: 0, icb: 0, ...(hasBase ? { acbBase: 0, icbBase: 0 } : {}),
   }]));
   const seen = new Set();
-  const column = Object.fromEntries(required.map(key => [key, columns.indexOf(key)]));
+  const column = Object.fromEntries(usedKeys.map(key => [key, columns.indexOf(key)]));
   for (const [i, row] of rows.entries()) {
     if (!row.some(value => String(value ?? "").trim() !== "")) continue;
     const rowNumber = range.s.r + header + i + 2;
@@ -68,7 +70,7 @@ function aggregateWorkbook(bytes, slot) {
     const item = values[brand];
     item.acb = sumCounts(item.acb, count("acb_with_robotic"));
     item.icb = sumCounts(item.icb, sumCounts(count("segment_c_with_robotic"), count("other_icb_with_robotic")));
-    if (slot === "early") {
+    if (hasBase) {
       item.acbBase = sumCounts(item.acbBase, count("acb"));
       item.icbBase = sumCounts(item.icbBase, sumCounts(count("segment_c"), count("other_icb")));
     }
@@ -100,7 +102,7 @@ function ratio(cell, actual, base, difference) {
     const delta = document.createElement("span");
     delta.className = "delta";
     delta.textContent = (difference > 0 ? "+" : "") + format.format(difference);
-    delta.setAttribute("aria-label", "較 18:00 " + delta.textContent);
+    delta.setAttribute("aria-label", "較 T-1 21:30 " + delta.textContent);
     cell.append(delta);
   }
 }
@@ -113,18 +115,22 @@ const resultRows = [...brands, "Total"].map(brand => {
   label.scope = "row";
   label.textContent = brand;
   row.append(label);
-  return { brand, cells: Array.from({ length: 4 }, () => row.insertCell()) };
+  return { brand, cells: Array.from({ length: 6 }, () => row.insertCell()) };
 });
 
 function renderResults() {
   for (const { brand, cells } of resultRows) {
+    const previous = slots.previous?.values[brand];
     const early = slots.early?.values[brand];
     const late = slots.late?.values[brand];
     for (const [i, metric] of metrics.entries()) {
       const base = early?.[metric + "Base"];
-      ratio(cells[i], early?.[metric], base);
-      const difference = early && late ? late[metric] - early[metric] : null;
-      ratio(cells[i + 2], late?.[metric], base, difference);
+      const previousCount = previous?.[metric];
+      const earlyDifference = previous && early ? early[metric] - previousCount : null;
+      const lateDifference = previous && late ? late[metric] - previousCount : null;
+      ratio(cells[i], previousCount, previous?.[metric + "Base"]);
+      ratio(cells[i + 2], early?.[metric], base, earlyDifference);
+      ratio(cells[i + 4], late?.[metric], base, lateDifference);
     }
   }
   const total = slots.late?.values.Total;
@@ -136,7 +142,18 @@ function save() {
 }
 try {
   const saved = JSON.parse(sessionStorage.getItem(storageKey));
-  for (const slot of Object.keys(slots)) slots[slot] = saved?.[slot] ?? null;
+  if (saved) {
+    for (const slot of Object.keys(slots)) slots[slot] = saved[slot] ?? null;
+  } else {
+    // The old early upload was labeled 18:00. Keep only the matching 21:30 slot.
+    const oldKey = "nd.cb-robotic-activation.v1";
+    const old = JSON.parse(sessionStorage.getItem(oldKey));
+    if (old) {
+      slots.late = old.late ?? null;
+      save();
+      sessionStorage.removeItem(oldKey);
+    }
+  }
 } catch { /* The page can still accept files. */ }
 
 for (const panel of document.querySelectorAll(".upload")) {

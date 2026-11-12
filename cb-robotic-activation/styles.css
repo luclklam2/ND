@@ -12,7 +12,7 @@ header { border-top: 5px solid #6427a6; padding-top: 22px; margin-bottom: 27px; 
 h1 { font-size: clamp(26px, 4.25vw, 47px); line-height: 1.1; letter-spacing: -.04em; margin: 0; }
 header p, footer, .summary p { color: #574e63; }
 header p { margin: 13px 0 0; }
-.uploads { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; margin-bottom: 28px; }
+.uploads { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; margin-bottom: 28px; }
 .upload { background: #fff; border: 1px solid #d9d0e4; padding: 16px 20px 13px; }
 .upload h2 { display: inline-block; font-size: 23px; margin: 0 12px 8px 0; font-variant-numeric: tabular-nums; }
 input[type=file] { position: absolute; width: 1px; height: 1px; opacity: 0; }
@@ -31,7 +31,7 @@ table { border-collapse: separate; border-spacing: 5px; table-layout: fixed; wid
 th, td { text-align: center; padding: 10px 3px; }
 thead th { background: #eeeaf4; font-size: 17px; }
 thead tr:first-child th { font-size: 24px; }
-thead th[rowspan] { width: 19%; font-size: 16px !important; }
+thead th[rowspan] { width: 15%; font-size: 16px; }
 tbody th, tbody td { background: var(--row-color); }
 tbody th { font-size: 20px; }
 td { height: 68px; }
@@ -53,14 +53,15 @@ footer { margin-top: 17px; }
   main { width: calc(100% - 24px); padding-top: 25px; }
   .uploads { gap: 7px; margin-bottom: 17px; }
   .upload { padding: 10px 8px; }
-  .upload h2 { display: block; font-size: 19px; }
+  .upload h2 { display: block; font-size: 14px; margin-right: 0; }
   .file-button { font-size: .76rem; margin-right: 4px; padding: 6px 7px; }
   .results { padding: 4px; }
-  table { border-spacing: 3px; }
+  table { border-spacing: 2px; }
   th, td { padding-inline: 2px; }
-  thead tr:first-child th { font-size: 18px; }
-  thead th, thead th[rowspan] { font-size: 13px !important; }
-  tbody th { font-size: 13px; }
-  .denominator { display: block; }
+  thead tr:first-child th, thead tr:first-child th[rowspan], thead th { font-size: 13px; }
+  thead th span { display: block; }
+  tbody th { font-size: 11px; }
+  .denominator { display: block; font-size: 9px; }
+  .delta { padding-inline: 3px; font-size: 11px; }
   .summary { align-items: stretch; flex-direction: column; gap: 3px; }
 }

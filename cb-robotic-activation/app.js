@@ -30,7 +30,8 @@ function sumCounts(left, right) {
 
 function aggregateWorkbook(bytes, slot) {
   const workbook = XLSX.read(bytes, { type: "array" });
-  const required = ["brand", ...numeratorKeys, ...(slot === "early" ? denominatorKeys : [])];
+  const hasBase = slot === "previous";
+  const required = ["brand", ...numeratorKeys, ...(hasBase ? denominatorKeys : [])];
   const matches = [];
   for (const name of workbook.SheetNames) {
     const sheet = workbook.Sheets[name];
@@ -44,9 +45,7 @@ function aggregateWorkbook(bytes, slot) {
   if (matches.length === 0) throw new Error("搵唔到所需 Excel 欄位（" + required.join(", ") + "）。");
   if (matches.length > 1) throw new Error("有多個分頁符合格式。請上載只包含一個數據分頁嘅 Excel。");
   const { name, sheet, range, header, columns } = matches[0];
-  const hasBase = slot === "early" || (slot === "previous" && denominatorKeys.every(key => columns.includes(key)));
-  const usedKeys = hasBase && slot === "previous" ? [...required, ...denominatorKeys] : required;
-  if (usedKeys.some(key => columns.indexOf(key) !== columns.lastIndexOf(key))) {
+  if (required.some(key => columns.indexOf(key) !== columns.lastIndexOf(key))) {
     throw new Error("Excel 有重複欄名，請核對後再上載。");
   }
   const rows = XLSX.utils.sheet_to_json(sheet, {
@@ -57,7 +56,7 @@ function aggregateWorkbook(bytes, slot) {
     acb: 0, icb: 0, ...(hasBase ? { acbBase: 0, icbBase: 0 } : {}),
   }]));
   const seen = new Set();
-  const column = Object.fromEntries(usedKeys.map(key => [key, columns.indexOf(key)]));
+  const column = Object.fromEntries(required.map(key => [key, columns.indexOf(key)]));
   for (const [i, row] of rows.entries()) {
     if (!row.some(value => String(value ?? "").trim() !== "")) continue;
     const rowNumber = range.s.r + header + i + 2;
@@ -124,11 +123,11 @@ function renderResults() {
     const early = slots.early?.values[brand];
     const late = slots.late?.values[brand];
     for (const [i, metric] of metrics.entries()) {
-      const base = early?.[metric + "Base"];
+      const base = previous?.[metric + "Base"];
       const previousCount = previous?.[metric];
       const earlyDifference = previous && early ? early[metric] - previousCount : null;
       const lateDifference = previous && late ? late[metric] - previousCount : null;
-      ratio(cells[i], previousCount, previous?.[metric + "Base"]);
+      ratio(cells[i], previousCount, base);
       ratio(cells[i + 2], early?.[metric], base, earlyDifference);
       ratio(cells[i + 4], late?.[metric], base, lateDifference);
     }
@@ -166,6 +165,9 @@ for (const panel of document.querySelectorAll(".upload")) {
     const current = slots[slot];
     status.textContent = current ? "已讀取 " + current.name : "未上載";
     if (current?.absent.length) status.textContent += " · 缺少 " + current.absent.join("、") + "，總數暫留空";
+    if (slot === "previous" && current && Object.values(current.values).some(row => row && row.acbBase == null)) {
+      status.textContent += " · 請重新上載包含分母欄位嘅 T-1 Excel。";
+    }
     clear.hidden = !current;
   };
   showStatus();

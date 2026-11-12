@@ -49,6 +49,18 @@ td { height: 68px; }
 .combined span { display: block; font-size: .82rem; }
 .combined strong { display: block; margin-top: 1px; font-size: 30px; font-variant-numeric: tabular-nums; }
 footer { margin-top: 17px; }
+.floor-results { margin-top: 22px; }
+.floor-results h2 { margin: 4px 5px 11px; font-size: 20px; }
+.floor-results p { margin: 4px 5px 8px; color: #574e63; font-size: .83rem; }
+.floor-scroll { overflow-x: auto; }
+.floor-scroll:focus-visible { outline: 2px solid #6427a6; outline-offset: 2px; }
+.floor-scroll-hint { display: none; }
+.floor-scroll table { min-width: 600px; }
+.floor-scroll thead th[rowspan] { width: 23%; }
+.floor-group th, .floor-row th { text-align: left; padding-left: 10px; }
+.floor-group th { padding-block: 7px; font-size: 15px; }
+.floor-row th { font-size: 14px; }
+.floor-row td { height: 53px; }
 @media (max-width: 610px) {
   main { width: calc(100% - 24px); padding-top: 25px; }
   .uploads { gap: 7px; margin-bottom: 17px; }
@@ -63,5 +75,6 @@ footer { margin-top: 17px; }
   tbody th { font-size: 11px; }
   .denominator { display: block; font-size: 9px; }
   .delta { padding-inline: 3px; font-size: 11px; }
+  .floor-scroll-hint { display: block; }
   .summary { align-items: stretch; flex-direction: column; gap: 3px; }
 }

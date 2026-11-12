@@ -5,9 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
   <title>CB Robotic Activation Performance</title>
-  <link rel="stylesheet" href="styles.css?v=2">
+  <link rel="stylesheet" href="styles.css?v=4">
   <script defer src="vendor/xlsx.full.min.js"></script>
-  <script defer src="app.js?v=3"></script>
+  <script defer src="app.js?v=4"></script>
 </head>
 <body>
   <main>
@@ -64,6 +64,29 @@
           <span>Today 21:30 ACB + ICB Robotic</span>
           <strong id="combined-value">—</strong>
         </div>
+      </div>
+    </section>
+    <section class="results floor-results" aria-labelledby="floor-title">
+      <h2 id="floor-title">樓層明細</h2>
+      <p id="floor-note">上載包含 Floor 欄嘅 Excel 後，就會顯示樓層數據。</p>
+      <div class="floor-scroll" id="floor-table" role="region" aria-labelledby="floor-title" tabindex="0" hidden>
+        <p class="floor-scroll-hint">左右滑動睇三個時段。</p>
+        <table aria-label="各樓層 ACB 同 ICB" aria-describedby="comparison-note">
+          <colgroup span="1"></colgroup>
+          <colgroup span="2"></colgroup>
+          <colgroup span="2"></colgroup>
+          <colgroup span="2"></colgroup>
+          <thead>
+            <tr>
+              <th rowspan="2" scope="col">樓層</th>
+              <th colspan="2" scope="colgroup"><span>T-1</span> 21:30</th>
+              <th colspan="2" scope="colgroup"><span>Today</span> 18:30</th>
+              <th colspan="2" scope="colgroup"><span>Today</span> 21:30</th>
+            </tr>
+            <tr><th scope="col">ACB</th><th scope="col">ICB</th><th scope="col">ACB</th><th scope="col">ICB</th><th scope="col">ACB</th><th scope="col">ICB</th></tr>
+          </thead>
+          <tbody id="floor-body"></tbody>
+        </table>
       </div>
     </section>
     <footer>Excel 只會喺呢個瀏覽器分頁處理。數字會保留到關閉分頁。</footer>

@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="zh-Hant-HK">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
+  <title>CB Robotic Activation Performance</title>
+  <link rel="stylesheet" href="styles.css">
+  <script defer src="vendor/xlsx.full.min.js"></script>
+  <script defer src="app.js"></script>
+</head>
+<body>
+  <main>
+    <header>
+      <h1>CB Robotic Activation Performance</h1>
+      <p>分別上載兩個時段嘅 Excel。21:30 沿用 18:00 嘅分母。</p>
+    </header>
+    <section class="uploads" aria-label="上載 Excel">
+      <div class="upload" data-slot="early">
+        <h2>18:00</h2>
+        <input type="file" id="early-file" accept=".xlsx,.xls" aria-label="上載 18:00 Excel">
+        <label class="file-button" for="early-file">上載 Excel</label>
+        <button type="button" class="clear" hidden>清除 18:00</button>
+        <p class="file-status" role="status">未上載</p>
+        <p class="file-error" role="alert" hidden></p>
+      </div>
+      <div class="upload" data-slot="late">
+        <h2>21:30</h2>
+        <input type="file" id="late-file" accept=".xlsx,.xls" aria-label="上載 21:30 Excel">
+        <label class="file-button" for="late-file">上載 Excel</label>
+        <button type="button" class="clear" hidden>清除 21:30</button>
+        <p class="file-status" role="status">未上載</p>
+        <p class="file-error" role="alert" hidden></p>
+      </div>
+    </section>
+    <section class="results" aria-label="CB Robotic 數據">
+      <table aria-label="各品牌 ACB 同 ICB" aria-describedby="comparison-note">
+        <colgroup span="1"></colgroup>
+        <colgroup span="2"></colgroup>
+        <colgroup span="2"></colgroup>
+        <thead>
+          <tr><th rowspan="2" scope="col">品牌</th><th colspan="2" scope="colgroup">18:00</th><th colspan="2" scope="colgroup">21:30</th></tr>
+          <tr><th scope="col">ACB</th><th scope="col">ICB</th><th scope="col">ACB</th><th scope="col">ICB</th></tr>
+        </thead>
+        <tbody id="results-body"></tbody>
+      </table>
+      <div class="summary">
+        <p id="comparison-note">黃色數字顯示 21:30 比 18:00 嘅分子變化。</p>
+        <div class="combined">
+          <span>21:30 ACB + ICB Robotic</span>
+          <strong id="combined-value">—</strong>
+        </div>
+      </div>
+    </section>
+    <footer>Excel 只會喺呢個瀏覽器分頁處理。數字會保留到關閉分頁。</footer>
+  </main>
+</body>
+</html>

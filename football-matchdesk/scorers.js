@@ -44,7 +44,7 @@ export async function showScorers(target,match,signal,getMatch) {
     const sides = header.competitions?.[0]?.competitors ?? [];
     const cards = ['home','away'].map(side=>{
       const card = add(target,'article','');
-      add(card,'h3',(side==='home'?match.homeTeam:match.awayTeam).name_ch);
+      add(card,'h3',(side==='home'?match.homeTeam:match.awayTeam).name_ch+' · 入球頭五名');
       return card;
     });
     pending.remove();

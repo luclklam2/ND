@@ -1,7 +1,8 @@
-import { showScorers } from './scorers.js?v=20261120c';
-import { showScoreAnalysis } from './score.js?v=20261120c';
+import { setMatchOverview, showComparison } from './view.js?v=20261120design';
+import { showScorers } from './scorers.js?v=20261120design';
+import { showScoreAnalysis } from './score.js?v=20261120design';
 import { formatResult, resultTotal, summarize } from './form.js';
-import { lookup, showLineups } from './lineups.js?v=20261120c';
+import { lookup, showLineups } from './lineups.js?v=20261120design';
 import { inSeason, seasonSchedules } from './season.js';
 const endpoint = 'https://info.cld.hkjc.com/graphql/base/';
 const element = id => document.getElementById(id);
@@ -210,11 +211,13 @@ async function showRecent() {
   const signal = recentView.render.signal;
   const onlySame = element('sameOnly').checked;
   const code = match.tournament?.code;
-  const visible = onlySame ? histories.map(promise=>promise.then(rows=>rows.filter(row=>code && row.tournament?.code===code))) : histories;
+  const count = Number(element('sampleSize').value);
+  const visible = histories.map(promise=>promise.then(rows=>rows.slice(0,count).filter(row=>!onlySame || (code && row.tournament?.code===code))));
   showMeetings(match,[],signal,true);
   await Promise.all([
     loadPanels(element('recent'),match,start,onlySame,signal,visible),
     showScoreAnalysis(element('scoreAnalysis'),match,visible,signal),
+    showComparison(match,visible,signal),
     Promise.allSettled(visible).then(results=>showMeetings(match,results,signal))
   ]);
 }
@@ -255,6 +258,7 @@ async function selectFixture() {
   const match = matches.find(m=>m.id===fixture.value);
   element('details').hidden = !match;
   if (!match) return;
+  setMatchOverview(match);
   element('selected').textContent = name(match);
   const venue = match.venue?.name_ch || match.venue?.name_en;
   element('venue').textContent = venue ? '球場 '+venue : '馬會場次資料暫未有球場';
@@ -274,6 +278,7 @@ async function selectFixture() {
 }
 
 element('sameOnly').addEventListener('change',showRecent);
+element('sampleSize').addEventListener('change',showRecent);
 fixture.addEventListener('change',selectFixture);
 refresh.addEventListener('click',loadFixtures);
 loadFixtures();

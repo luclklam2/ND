@@ -2,8 +2,11 @@ const espn = 'https://site.api.espn.com/apis/site/v2/sports/soccer/all/';
 const espnDay = new Intl.DateTimeFormat('en-CA', {
   timeZone:'America/New_York',year:'numeric',month:'2-digit',day:'2-digit'
 });
-const normalize = name => String(name ?? '').normalize('NFD').toLowerCase()
-  .replace(/\p{M}/gu,'').replace(/\b(?:fc|cf|afc|sc|club)\b/g,'').replace(/[^a-z0-9]/g,'');
+const normalize = name => {
+  const value = String(name ?? '').normalize('NFD').toLowerCase()
+    .replace(/\p{M}/gu,'').replace(/\b(?:fc|cf|afc|sc|club)\b/g,'').replace(/[^a-z0-9]/g,'');
+  return value==='bilbao' ? 'athletic' : value;
+};
 const names = team => [team?.displayName,team?.shortDisplayName,team?.name,team?.location]
   .map(normalize).filter(Boolean);
 

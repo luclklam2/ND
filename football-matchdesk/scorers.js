@@ -53,15 +53,16 @@ export async function showScorers(target,match,signal,getMatch) {
       const status = add(card,'p','正在讀取球員入球統計…');
       try {
         const team = sides.find(item=>item.homeAway===side)?.team;
-        if (!/^\d+$/.test(team?.id ?? '')) throw Error();
+        if (!/^\d+$/.test(team?.id ?? '')) throw Error('未能確認球隊代碼。');
         const url = 'https://site.api.espn.com/apis/site/v2/sports/soccer/'+league+
           '/teams/'+team.id+'/roster?season='+season;
         const response = await fetch(url,{signal:AbortSignal.any([signal,AbortSignal.timeout(12000)])});
-        if (!response.ok) throw Error();
+        if (!response.ok) throw Error('ESPN 連線失敗（HTTP '+response.status+'），請稍後 Refresh。');
         const payload = await response.json();
         if (signal.aborted) return;
-        if (payload.season?.year!==season ||
-            !Array.isArray(payload.athletes) || !payload.athletes.length) throw Error();
+        if (payload.season?.year!==season) throw Error('ESPN 回傳球季不符，暫停顯示入球榜。');
+        if (!Array.isArray(payload.athletes) || !payload.athletes.length) throw Error('ESPN 未提供呢隊球季球員統計。');
+        add(card,'small','成功讀取 '+new Intl.DateTimeFormat('zh-HK',{timeZone:'Asia/Hong_Kong',dateStyle:'short',timeStyle:'short'}).format(new Date())+' 香港時間');
         const ranking = rankedScorers(payload.athletes);
         const roster = found.summary.rosters?.find(item=>item.homeAway===side);
         status.textContent = (payload.season.displayName || payload.season.name || header.league.name)+
@@ -87,8 +88,8 @@ export async function showScorers(target,match,signal,getMatch) {
         link.target = '_blank';
         link.rel = 'noopener';
         add(card,'small','球衣號碼優先按今場名單，欠缺時用球隊登記號碼。同球數按姓名排序，最多顯示五人。今場後備代表列入後備名單。統計係讀取時嘅球季累計，已開波場次可能包括今場入球；未列名球員嘅缺陣原因有待核實。');
-      } catch {
-        if (!signal.aborted) status.textContent = '呢隊嘅同季入球統計暫時未能取得。';
+      } catch (error) {
+        if (!signal.aborted) status.textContent = error.name==='TimeoutError' ? 'ESPN 讀取逾時，請 Refresh 重試。' : (error.message || '球員統計讀取失敗，請 Refresh 重試。');
       }
     }));
   } catch {

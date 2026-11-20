@@ -1,8 +1,8 @@
-import { setMatchOverview, showComparison } from './view.js?v=20261120scroll';
-import { showScorers } from './scorers.js?v=20261120scroll';
-import { showScoreAnalysis } from './score.js?v=20261120scroll';
+import { setMatchOverview, showComparison } from './view.js?v=20261120data';
+import { showScorers } from './scorers.js?v=20261120data';
+import { showScoreAnalysis } from './score.js?v=20261120data';
 import { formatResult, resultTotal, summarize } from './form.js';
-import { lookup, showLineups } from './lineups.js?v=20261120scroll';
+import { lookup, showLineups } from './lineups.js?v=20261120data';
 import { inSeason, seasonSchedules } from './season.js';
 const endpoint = 'https://info.cld.hkjc.com/graphql/base/';
 const element = id => document.getElementById(id);
@@ -217,7 +217,7 @@ async function showRecent() {
   await Promise.all([
     loadPanels(element('recent'),match,start,onlySame,signal,visible),
     showScoreAnalysis(element('scoreAnalysis'),match,visible,signal),
-    showComparison(match,visible,signal),
+    showComparison(match,visible,signal,histories),
     Promise.allSettled(visible).then(results=>showMeetings(match,results,signal))
   ]);
 }

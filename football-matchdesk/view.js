@@ -1,4 +1,4 @@
-import { summarize, resultTotal } from './form.js';
+import { summarize, resultTotal, confirmedResult } from './form.js';
 
 const add = (parent,tag,text)=>{
   const node=document.createElement(tag);
@@ -19,13 +19,13 @@ function updateClock() {
 }
 setInterval(updateClock,60000);
 
-export async function showComparison(match,histories,signal) {
+export async function showComparison(match,histories,signal,scheduleHistories=histories) {
   const coverage=document.getElementById('coverage');
   const target=document.getElementById('comparison');
   coverage.replaceChildren();
   target.replaceChildren();
   add(target,'p','正在整理兩隊數據…');
-  const results=await Promise.allSettled(histories);
+  const [results,schedules]=await Promise.all([Promise.allSettled(histories),Promise.allSettled(scheduleHistories)]);
   if (signal.aborted) return;
   const teams=[match.homeTeam,match.awayTeam];
   const samples=results.map(result=>result.status==='fulfilled'?result.value:null);
@@ -69,4 +69,47 @@ export async function showComparison(match,histories,signal) {
     const stat=summarize(split,teams[i].id)[2];
     add(splitRow,'td',rows?stat[1]+' · '+stat[2]+' 場':'未取得');
   });
-}
+
+  const appendMetric=(label,values)=>{
+    const row=add(body,'tr','');
+    add(row,'th',label).scope='row';
+    values.forEach(value=>add(row,'td',value));
+  };
+  const proportion=(rows,test,type=1,stage=5)=>{
+    if (!rows) return '讀取失敗';
+    const values=rows.map(row=>confirmedResult(row,type,stage)).filter(record=>
+      record && (type===2 ? Number.isInteger(record.ttlCornerResult) && record.ttlCornerResult>=0 :
+      [record.homeResult,record.awayResult].every(n=>Number.isInteger(n) && n>=0)));
+    // Corner results may provide a pair without a separate total.
+    const totals=type===2 ? rows.map(row=>resultTotal(row,2,stage)).filter(value=>value!==null) : values;
+    if (!totals.length) return '欠有效樣本';
+    const count=totals.filter(test).length;
+    return count+'/'+totals.length+' 場 · '+(count/totals.length*100).toFixed(0)+'%';
+  };
+  appendMetric('全場大 2.5',samples.map(rows=>proportion(rows,r=>r.homeResult+r.awayResult>2.5)));
+  appendMetric('全場大 3.5',samples.map(rows=>proportion(rows,r=>r.homeResult+r.awayResult>3.5)));
+  appendMetric('兩隊都有入球',samples.map(rows=>proportion(rows,r=>r.homeResult>0 && r.awayResult>0)));
+  appendMetric('全場角球大 9.5',samples.map(rows=>proportion(rows,total=>total>9.5,2,5)));
+  appendMetric('半場角球大 4.5',samples.map(rows=>proportion(rows,total=>total>4.5,2,3)));
+  appendMetric('主場／作客角球取得／失去',samples.map((rows,i)=>{
+    if (!rows) return '讀取失敗';
+    const split=rows.filter(row=>(row.homeTeam.id===teams[i].id)===(i===0));
+    const stat=summarize(split,teams[i].id)[5];
+    return stat[1]+' · '+stat[2]+' 場';
+  }));
+  const cutoff=Math.min(Date.now(),Date.parse(match.kickOffTime));
+  const schedulesRows=schedules.map(result=>result.status==='fulfilled'?result.value:null);
+  appendMetric('距上場開波時間（按今場開波計）',schedulesRows.map(rows=>{
+    if (!rows) return '讀取失敗';
+    const dates=rows.map(row=>Date.parse(row.kickOffTime)).filter(time=>time<cutoff);
+    if (!dates.length) return '欠賽果紀錄';
+    const hours=Math.floor((Date.parse(match.kickOffTime)-Math.max(...dates))/3600000);
+    return Math.floor(hours/24)+' 日 '+hours%24+' 小時';
+  }));
+  appendMetric('今場前 14 日已完場場數',schedulesRows.map(rows=>{
+    if (!rows) return '讀取失敗';
+    const start=Date.parse(match.kickOffTime)-14*86400000;
+    const count=rows.filter(row=>Date.parse(row.kickOffTime)>=start && Date.parse(row.kickOffTime)<cutoff).length;
+    return (count>=10?'至少 ':'')+count+' 場 · 馬會近 10 場收錄範圍';
+  }));
+  add(target,'small','比例係所選歷史樣本。賽程負荷使用未經賽項篩選嘅近 10 場已完場紀錄；今場前尚未完成嘅賽事未計入。');}

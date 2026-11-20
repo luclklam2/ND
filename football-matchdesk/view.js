@@ -70,23 +70,3 @@ export async function showComparison(match,histories,signal) {
     add(splitRow,'td',rows?stat[1]+' · '+stat[2]+' 場':'未取得');
   });
 }
-
-const tabs=[...document.querySelectorAll('[role=tab]')];
-function activate(tab,focus=false) {
-  for (const item of tabs) {
-    const selected=item===tab;
-    item.setAttribute('aria-selected',String(selected));
-    item.tabIndex=selected?0:-1;
-    document.getElementById(item.getAttribute('aria-controls')).hidden=!selected;
-  }
-  if(focus) tab.focus();
-}
-tabs.forEach((tab,index)=>{
-  tab.addEventListener('click',()=>activate(tab));
-  tab.addEventListener('keydown',event=>{
-    const next={ArrowRight:(index+1)%tabs.length,ArrowLeft:(index+tabs.length-1)%tabs.length,Home:0,End:tabs.length-1}[event.key];
-    if(next===undefined) return;
-    event.preventDefault();
-    activate(tabs[next],true);
-  });
-});

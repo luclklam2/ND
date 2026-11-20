@@ -60,12 +60,15 @@ export async function showScorers(target,match,signal,getMatch) {
         if (!response.ok) throw Error();
         const payload = await response.json();
         if (signal.aborted) return;
-        if (payload.season?.year!==season || payload.season?.type!==header.season.type ||
+        if (payload.season?.year!==season ||
             !Array.isArray(payload.athletes) || !payload.athletes.length) throw Error();
         const ranking = rankedScorers(payload.athletes);
         const roster = found.summary.rosters?.find(item=>item.homeAway===side);
         status.textContent = (payload.season.displayName || payload.season.name || header.league.name)+
           ' · 有入球數據 '+ranking.available+'/'+ranking.total+' 名現有名單球員';
+        if (payload.season.type!==header.season.type) {
+          add(card,'p','今場階段：'+header.season.name+'。入球榜使用 ESPN '+season+' 年球季累計，涵蓋範圍可能同今場階段不同。');
+        }
         if (!ranking.players.length) {
           add(card,'p','暫未取得有入球嘅球員數據。');
           return;

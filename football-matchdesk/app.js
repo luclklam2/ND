@@ -1,7 +1,7 @@
-import { showScorers } from './scorers.js?v=20261120b';
-import { showScoreAnalysis } from './score.js?v=20261120b';
+import { showScorers } from './scorers.js?v=20261120c';
+import { showScoreAnalysis } from './score.js?v=20261120c';
 import { formatResult, resultTotal, summarize } from './form.js';
-import { lookup, showLineups } from './lineups.js?v=20261120b';
+import { lookup, showLineups } from './lineups.js?v=20261120c';
 import { inSeason, seasonSchedules } from './season.js';
 const endpoint = 'https://info.cld.hkjc.com/graphql/base/';
 const element = id => document.getElementById(id);

@@ -2,7 +2,7 @@
 <html lang="zh-Hant">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="description" content="馬會足球賽事、兩隊近況、角球與陣容比較。">
 <title>馬會足球場次研究台</title>
 <style>
@@ -28,6 +28,38 @@ article,.surface{background:var(--paper);border:1px solid var(--line);padding:1.
 .meets-threshold{background:#d4efda;color:#153820}.below-threshold{background:#f8dcda;color:#54211e}
 .squad-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1rem}#lineups,#scorers{display:contents}#lineups>article:nth-child(1){grid-column:1;grid-row:1}#lineups>article:nth-child(2){grid-column:2;grid-row:1}#lineups>article:nth-child(n+3){grid-column:1/-1;grid-row:3}#scorers>article:nth-child(1){grid-column:1;grid-row:2}#scorers>article:nth-child(2){grid-column:2;grid-row:2}#scorers>p{grid-column:1/-1}#lineupSummary{margin-bottom:1rem}#scorers li{padding:.5rem 0;border-bottom:1px solid var(--line)}small{display:block;margin-top:.5rem;font-size:.8rem}
 @media(max-width:700px){.grid,.squad-grid,#scoreAnalysis{grid-template-columns:1fr}.squad-grid article{grid-column:auto!important;grid-row:auto!important}#lineups>article:nth-child(1){order:1}#scorers>article:nth-child(1){order:2}#lineups>article:nth-child(2){order:3}#scorers>article:nth-child(2){order:4}#lineups>article:nth-child(n+3){order:5}#scoreAnalysis>div+div{border-left:0;border-top:1px solid var(--line);padding:1rem 0 0}.controls{padding:.75rem}.controls .field{min-width:100%}.controls button{width:100%}}
+@media(max-width:700px){
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+body{font-size:16px;line-height:1.65}
+header{padding:1rem max(.75rem,env(safe-area-inset-left)) .5rem}
+header p{font-size:.85rem}h1{font-size:1.65rem}
+main{padding:0 max(.75rem,env(safe-area-inset-right)) max(2rem,env(safe-area-inset-bottom)) max(.75rem,env(safe-area-inset-left))}
+.controls{position:static;padding:.75rem}
+.controls .row{gap:.5rem}.controls .field{min-width:0;flex-basis:100%}
+select,input,button{font-size:16px;min-height:48px}
+.controls button{width:auto;min-width:8rem}
+#status{font-size:.8rem;line-height:1.5}
+.match-head{padding:1rem 0}.match-head h2{font-size:1.35rem}.match-head .note{font-size:.85rem}
+section{margin-top:1.25rem}h2{font-size:1.15rem}
+article,.surface{padding:.85rem;min-width:0}
+.note{font-size:.875rem}small{font-size:.8rem}
+#coverage{grid-template-columns:1fr;gap:.75rem}
+#coverage>div+div{border-top:1px solid var(--line);padding-top:.75rem}
+.filters{gap:.5rem .75rem;font-size:16px}.filters .note{flex-basis:100%}
+.filters input[type=checkbox]{width:20px;height:20px;min-height:20px}
+.filters label:has(input){display:flex;align-items:center;gap:.5rem;min-height:44px}
+#comparison{padding:.4rem;overflow:visible}
+#comparison table{table-layout:fixed;width:100%;font-size:14px}
+#comparison th,#comparison td{white-space:normal;overflow-wrap:anywhere;padding:.6rem .35rem;vertical-align:middle;line-height:1.5}
+#comparison th:first-child{width:38%}
+#comparison thead th{font-size:14px}
+#scorers ol,#lineups ol{padding-left:1.4rem}
+#scorers li{font-size:16px;line-height:1.7;overflow-wrap:anywhere}
+article a{overflow-wrap:anywhere}
+#recent .table,#same .table,#meetings .table{overscroll-behavior-x:contain}
+#recent table,#same table,#meetings table{font-size:14px}
+#scoreAnalysis{gap:1rem}#scoreAnalysis textarea{font-size:16px}
+}
 </style>
 </head>
 <body>
@@ -59,5 +91,5 @@ article,.surface{background:var(--paper);border:1px solid var(--line);padding:1.
 </div>
 <section class="note">比分與角球來源 <a href="https://bet.hkjc.com/ch/football/home" target="_blank" rel="noopener">香港賽馬會足球</a>，只涵蓋馬會收錄場次。球員與陣容來源 ESPN，各區顯示資料覆蓋。</section>
 </main>
-<script type="module" src="app.js?v=20261120data"></script>
+<script type="module" src="app.js?v=20261120iphone"></script>
 </body></html>

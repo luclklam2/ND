@@ -1,8 +1,8 @@
-import { setMatchOverview, showComparison } from './view.js?v=20261120shirts';
-import { showScorers } from './scorers.js?v=20261120shirts';
-import { showScoreAnalysis } from './score.js?v=20261120shirts';
+import { setMatchOverview, showComparison } from './view.js?v=20261120corners';
+import { showScorers } from './scorers.js?v=20261120corners';
+import { showScoreAnalysis } from './score.js?v=20261120corners';
 import { formatResult, resultTotal, summarize } from './form.js';
-import { lookup, showLineups } from './lineups.js?v=20261120shirts';
+import { lookup, showLineups } from './lineups.js?v=20261120corners';
 import { inSeason, seasonSchedules } from './season.js';
 const endpoint = 'https://info.cld.hkjc.com/graphql/base/';
 const element = id => document.getElementById(id);

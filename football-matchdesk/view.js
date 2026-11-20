@@ -1,4 +1,4 @@
-import { summarize } from './form.js';
+import { summarize, resultTotal } from './form.js';
 
 const add = (parent,tag,text)=>{
   const node=document.createElement(tag);
@@ -50,7 +50,17 @@ export async function showComparison(match,histories,signal) {
     const row=add(body,'tr','');
     const label=metrics.find(Boolean)?.[index]?.[0] || ['全場勝／和／負','半場領先／打和／落後','場均入球／失球','場均半場總角球','場均全場總角球','場均角球取得／失去'][index];
     add(row,'th',label).scope='row';
-    metrics.forEach(data=>add(row,'td',data?data[index][1]+' · '+data[index][2]+' 場':'未取得'));
+    metrics.forEach((data,side)=>{
+      const cell=add(row,'td',data?data[index][1]+' · '+data[index][2]+' 場':'未取得');
+      if (index!==3 && index!==4) return;
+      const line=index===3?4.5:9.5;
+      const totals=(samples[side] ?? []).map(game=>resultTotal(game,2,index===3?3:5))
+        .filter(value=>value!==null);
+      if (!totals.length) return;
+      const difference=totals.reduce((sum,value)=>sum+value,0)-line*totals.length;
+      cell.className=difference>0?'meets-threshold':difference<0?'below-threshold':'';
+      cell.title='場均總角球'+(difference>0?'大過':difference<0?'低過':'等於')+line;
+    });
   }
   const splitRow=add(body,'tr','');
   add(splitRow,'th','主隊主場／客隊作客 入球／失球').scope='row';

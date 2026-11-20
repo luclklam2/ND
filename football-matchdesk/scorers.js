@@ -10,7 +10,7 @@ export function rankedScorers(athletes) {
     const goal = player.statistics?.splits?.categories?.flatMap(category=>category.stats ?? [])
       .find(stat=>stat.name==='totalGoals');
     return player.id && player.displayName && Number.isInteger(goal?.value) && goal.value>=0
-      ? [{id:String(player.id),name:player.displayName,goals:goal.value}] : [];
+      ? [{id:String(player.id),name:player.displayName,goals:goal.value,jersey:player.jersey}] : [];
   });
   return {available:available.length,total:athletes.length,
     players:available.filter(player=>player.goals>0).sort((a,b)=>b.goals-a.goals || a.name.localeCompare(b.name)).slice(0,5)};
@@ -75,12 +75,18 @@ export async function showScorers(target,match,signal,getMatch) {
         }
         if (ranking.available<ranking.total) add(card,'p','部分球員統計欠缺，以下係有數據球員嘅入球排序。');
         const list = add(card,'ol','');
-        for (const player of ranking.players) add(list,'li',player.name+' · '+player.goals+' 球 · '+attendance(player.id,roster));
+        for (const player of ranking.players) {
+          const entry = roster?.roster?.find(item=>String(item.athlete?.id)===player.id);
+          const number = [entry?.jersey,entry?.athlete?.jersey,player.jersey]
+            .find(value=>/^\d{1,3}$/.test(String(value ?? '')));
+          const shirt = number===undefined ? '號碼未提供' : '#'+number;
+          add(list,'li',shirt+' '+player.name+' · '+player.goals+' 球 · '+attendance(player.id,roster));
+        }
         const link = add(card,'a','ESPN 球隊統計');
         link.href = 'https://www.espn.com/soccer/team/stats/_/id/'+team.id+'/league/'+league+'/season/'+season;
         link.target = '_blank';
         link.rel = 'noopener';
-        add(card,'small','同球數按姓名排序，最多顯示五人。今場後備代表列入後備名單。統計係讀取時嘅球季累計，已開波場次可能包括今場入球；未列名球員嘅缺陣原因有待核實。');
+        add(card,'small','球衣號碼優先按今場名單，欠缺時用球隊登記號碼。同球數按姓名排序，最多顯示五人。今場後備代表列入後備名單。統計係讀取時嘅球季累計，已開波場次可能包括今場入球；未列名球員嘅缺陣原因有待核實。');
       } catch {
         if (!signal.aborted) status.textContent = '呢隊嘅同季入球統計暫時未能取得。';
       }

@@ -1,4 +1,51 @@
-import { confirmedResult } from './form.js';
+import { confirmedResult, resultTotal } from './form.js';
+
+export function cornerAnalysis(match,homeRows,awayRows) {
+  const sample = (rows,teamId)=>rows.flatMap(row=>{
+    const total = resultTotal(row,2,5);
+    if (total===null) return [];
+    const pair = confirmedResult(row,2,5);
+    const validPair = [pair.homeResult,pair.awayResult].every(n=>Number.isInteger(n) && n>=0);
+    const home = row.homeTeam.id===teamId;
+    return [{id:row.id,total,home,
+      scored:validPair ? (home?pair.homeResult:pair.awayResult) : null,
+      conceded:validPair ? (home?pair.awayResult:pair.homeResult) : null}];
+  });
+  const home = sample(homeRows,match.homeTeam.id);
+  const away = sample(awayRows,match.awayTeam.id);
+  const unique = [...new Map([...home,...away].map(row=>[row.id,row])).values()];
+  return {home,away,unique};
+}
+
+function showCorners(target,match,homeRows,awayRows) {
+  add(target,'h3','全場角球分析');
+  const {home,away,unique} = cornerAnalysis(match,homeRows,awayRows);
+  add(target,'p','有效角球樣本 · 主隊 '+home.length+'/'+homeRows.length+' 場 · 客隊 '+away.length+'/'+awayRows.length+' 場');
+  for (const [label,rows] of [['主隊',home],['客隊',away]]) {
+    if (!rows.length) continue;
+    const mean = key=>rows.reduce((sum,row)=>sum+row[key],0)/rows.length;
+    const pairs = rows.filter(row=>row.scored!==null);
+    let text = label+'近期比賽總角球場均 '+mean('total').toFixed(2);
+    if (pairs.length) {
+      const own = key=>(pairs.reduce((sum,row)=>sum+row[key],0)/pairs.length).toFixed(2);
+      text+=' · 取得／失去 '+own('scored')+'／'+own('conceded')+'（'+pairs.length+' 場分隊角球）';
+    }
+    add(target,'p',text);
+  }
+  if (Math.min(home.length,away.length)<5) {
+    add(target,'p','兩隊各要最少 5 場有效全場角球，暫未提供總角球參考。');
+    return;
+  }
+  const average = rows=>rows.reduce((sum,row)=>sum+row.total,0)/rows.length;
+  add(target,'p','兩隊近期總角球均值參考 '+((average(home)+average(away))/2).toFixed(2)+' 球');
+  add(target,'p','歷史總角球高於指定線嘅場次（重複交手只計一次，共 '+unique.length+' 場）');
+  const list = add(target,'ul','');
+  for (const line of [8.5,9.5,10.5,11.5]) {
+    const count = unique.filter(row=>row.total>line).length;
+    add(list,'li','大 '+line+' · '+count+'/'+unique.length+' 場（'+(count/unique.length*100).toFixed(1)+'%）');
+  }
+  add(target,'small','以上係歷史樣本比例及均值。今場角球機率、盤口價值及輪換影響有待另行評估。');
+}
 
 function goalSample(rows,teamId) {
   return rows.flatMap(row=>{
@@ -66,6 +113,10 @@ export async function showScoreAnalysis(target,match,histories,signal) {
     return;
   }
   const [homeRows,awayRows] = results.map(row=>row.value);
+  const goals = add(target,'div','');
+  const corners = add(target,'div','');
+  showCorners(corners,match,homeRows,awayRows);
+  target = goals;
   const analysis = scoreAnalysis(match,homeRows,awayRows);
   const title = [match.homeTeam,match.awayTeam].map(team=>team.name_ch || team.name_en).join(' vs ');
   add(target,'p','有效全場比分樣本 · 主隊 '+analysis.home.length+'/'+homeRows.length+' 場 · 客隊 '+analysis.away.length+'/'+awayRows.length+' 場');

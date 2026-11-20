@@ -1,6 +1,7 @@
-import { showScoreAnalysis } from './score.js';
+import { showScorers } from './scorers.js?v=20261120';
+import { showScoreAnalysis } from './score.js?v=20261120';
 import { formatResult, resultTotal, summarize } from './form.js';
-import { lookup, showLineups } from './lineups.js';
+import { lookup, showLineups } from './lineups.js?v=20261120';
 import { inSeason, seasonSchedules } from './season.js';
 const endpoint = 'https://info.cld.hkjc.com/graphql/base/';
 const element = id => document.getElementById(id);
@@ -267,6 +268,7 @@ async function selectFixture() {
   await Promise.all([
     showRecent(),
     showLineups(element('lineups'),match,histories,signal,getMatch),
+    showScorers(element('scorers'),match,signal,getMatch),
     showSeason(match,start,signal,getMatch)
   ]);
 }

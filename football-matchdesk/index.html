@@ -35,12 +35,12 @@ th,td{border-bottom:1px solid var(--line);padding:.45rem;text-align:left}th{back
 </div>
 <div id="details" hidden>
 <section><h2 id="selected"></h2><p id="meta" class="note"></p><p id="venue" class="note"></p><p class="note">表內數字按每場歷史賽事嘅主隊–客隊排列。— 代表馬會未提供該項數據。</p><p class="note">主客合計達標用綠底，低於門檻用紅底。半場／全場入球門檻為 2／3 球，半場／全場角球門檻為 4／9 個。</p></section>
-<section><h2>全場比分分析</h2><p class="note">網站即時計算 Poisson 比分排序，以兩隊最近 10 場馬會賽果嘅入失球為基礎。模型涵蓋賽前歷史比分，未納入陣容、傷停或賠率。</p><article id="scoreAnalysis" aria-live="polite"></article></section><section><h2>今場正選與輪換</h2><p class="note">以最近 5 場馬會有收錄嘅已完場賽事比較。至少要有 3 場完整陣容，過半場次正選嘅球員列為常用正選。有 8 名或以上常用正選先作分類。缺 0–1 名屬接近常用正選，缺 2–3 名屬部分輪換跡象，缺 4 名或以上屬明顯輪換跡象。</p><div class="grid" id="lineups" aria-live="polite"></div><article id="lineupSummary" aria-live="polite"></article></section><section><h2>最近 10 場</h2><label><input id="sameOnly" type="checkbox"> 只顯示今場賽項嘅比分</label><p class="note">兩隊各自取最近 10 場，再按上面選項篩選。選項同時套用到全場比分分析同近期交手。</p><div class="grid" id="recent" aria-live="polite"></div></section>
+<section><h2>全場比分及角球分析</h2><p class="note">網站即時計算 Poisson 比分排序，以兩隊最近 10 場馬會賽果嘅入失球為基礎。角球部分顯示有效樣本、場均取得／失去及歷史大細線比例，沿用最近 10 場同賽項篩選。</p><article id="scoreAnalysis" aria-live="polite"></article></section><section><h2>今場正選與輪換</h2><p class="note">以最近 5 場馬會有收錄嘅已完場賽事比較。至少要有 3 場完整陣容，過半場次正選嘅球員列為常用正選。有 8 名或以上常用正選先作分類。缺 0–1 名屬接近常用正選，缺 2–3 名屬部分輪換跡象，缺 4 名或以上屬明顯輪換跡象。</p><div class="grid" id="lineups" aria-live="polite"></div><article id="lineupSummary" aria-live="polite"></article></section><section><h2>隊內入球頭五名及今場名單</h2><p class="note">按今場賽項同球季，列出 ESPN 現有球員名單中有統計嘅入球排序。名單未公布時顯示未確認。</p><div class="grid" id="scorers" aria-live="polite"></div></section><section><h2>最近 10 場</h2><label><input id="sameOnly" type="checkbox"> 只顯示今場賽項嘅比分</label><p class="note">兩隊各自取最近 10 場，再按上面選項篩選。選項同時套用到全場比分分析同近期交手。</p><div class="grid" id="recent" aria-live="polite"></div></section>
 <section><h2>近期交手</h2><p class="note">由兩隊各自最近 10 場賽果中擷取，重複場次只顯示一次。</p><article id="meetings" aria-live="polite"></article></section><section><h2>同賽項 · 同賽季</h2>
 <p id="seasonStatus" class="note" role="status"></p>
 <div class="grid" id="same" aria-live="polite"></div></section>
 </div>
 <section class="note">來源 <a href="https://bet.hkjc.com/ch/football/home" target="_blank" rel="noopener">香港賽馬會足球</a>。只涵蓋馬會賽果庫收錄嘅場次。</section>
 </main>
-<script type="module" src="app.js"></script>
+<script type="module" src="app.js?v=20261120"></script>
 </body></html>

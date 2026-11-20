@@ -73,6 +73,27 @@ function append(parent,tag,value) {
 
 const positions = {G:'門將',D:'後衛',M:'中場',F:'前鋒'};
 
+function alternativeSources(target,match) {
+  const panel = append(target,'article','');
+  append(panel,'h3','其他正選來源');
+  append(panel,'p','ESPN 未有資料時，可查球會／賽會官方公告，以及以下比賽頁搜尋。搜尋結果要核對兩隊、開波日期及正選公布狀態。');
+  const date = new Intl.DateTimeFormat('sv-SE',{timeZone:'Asia/Hong_Kong'}).format(new Date(match.kickOffTime));
+  const query = [match.homeTeam.name_en,match.awayTeam.name_en,date,'lineups'].join(' ');
+  const list = append(panel,'ul','');
+  for (const [label,site] of [['SofaScore','sofascore.com'],['FotMob','fotmob.com'],['Flashscore','flashscore.com']]) {
+    const item = append(list,'li','');
+    const link = append(item,'a',label+' 場次搜尋');
+    link.href = 'https://www.google.com/search?q='+encodeURIComponent('site:'+site+' '+query);
+    link.target = '_blank';
+    link.rel = 'noopener';
+  }
+  const official = append(panel,'a','搜尋球會／賽會官方正選公告');
+  official.href = 'https://www.google.com/search?q='+encodeURIComponent(query+' official starting XI');
+  official.target = '_blank';
+  official.rel = 'noopener';
+  append(panel,'small','以上提供外部搜尋入口。輪換比較採用本頁已取得嘅 ESPN 球員紀錄，預計陣容要等正式名單公布後再核實。');
+}
+
 export function lineupTakeaways(teams) {
   const lines = teams.map(({name,lineup,comparison,coverage,reason})=>{
     const formation = lineup?.formation ? '（'+lineup.formation+'）' : '';
@@ -159,6 +180,7 @@ export async function showLineups(target,match,histories,signal,getMatch=lookup(
     }
   }));
   if (signal.aborted) return;
+  alternativeSources(target,match);
   pending.remove();
   for (const line of lineupTakeaways(teams)) append(summary,'p',line);
   append(summary,'small','位置按近期正選紀錄。輪換跡象只反映人腳變動，缺陣原因及比分影響有待核實。');

@@ -5,9 +5,9 @@ export function totals(rows,type,stage) {
   return {n:values.length,value:values.length?values.reduce((sum,n)=>sum+n,0)/values.length:null};
 }
 
-export function pair(rows,id,type) {
+export function pair(rows,id,type,stage=5) {
   const values=rows.flatMap(row=>{
-    const score=confirmedResult(row,type,5);
+    const score=confirmedResult(row,type,stage);
     if(![score?.homeResult,score?.awayResult].every(value=>Number.isInteger(value)&&value>=0)) return [];
     return row.homeTeam.id===id ? [[score.homeResult,score.awayResult]] : [[score.awayResult,score.homeResult]];
   });
@@ -18,7 +18,7 @@ export function teamStats(rows,id,home) {
   const split=rows.filter(row=>(row.homeTeam.id===id)===home);
   return {
     half:totals(rows,2,3),full:totals(rows,2,5),
-    corners:pair(rows,id,2),goals:pair(split,id,1),splitCorners:pair(split,id,2),
+    corners:pair(rows,id,2),halfGoals:pair(split,id,1,3),goals:pair(split,id,1),splitCorners:pair(split,id,2),
     sample:rows.length,split:split.length
   };
 }

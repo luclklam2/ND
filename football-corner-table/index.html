@@ -11,7 +11,7 @@ h1{font-size:clamp(1.4rem,3vw,2rem);margin:0}p{margin:.5rem 0}.heading{display:f
 button{font:inherit;min-height:48px;padding:.5rem 1rem;background:var(--accent);color:white;border:0;border-radius:.25rem;font-weight:650;cursor:pointer}button:disabled{opacity:.6;cursor:wait}:focus-visible{outline:3px solid #a65900;outline-offset:3px}
 .note,small{color:var(--dim)}.note{font-size:.875rem}small{display:block;font-size:.75rem;font-weight:400}
 .table-wrap{margin-top:1rem;overflow:auto;max-height:78vh;background:white;border:1px solid var(--line);overscroll-behavior:contain}
-table{width:100%;min-width:1100px;border-collapse:separate;border-spacing:0;font-size:14px;font-variant-numeric:tabular-nums}
+table{width:100%;min-width:1470px;border-collapse:separate;border-spacing:0;font-size:14px;font-variant-numeric:tabular-nums}
 th,td{padding:.75rem .6rem;border-bottom:1px solid var(--line);border-right:1px solid var(--line);text-align:center;vertical-align:middle}
 thead th{position:sticky;top:0;z-index:3;background:#17362b;color:white;min-width:145px;font-weight:650}
 thead small{color:#c8e3d1}
@@ -25,7 +25,9 @@ tbody tr:nth-child(2n) td,tbody tr:nth-child(2n) th.team{border-bottom:3px solid
 .goal-value{display:inline-block;padding:.2rem .4rem;border-radius:.2rem;font-size:1.1rem;font-weight:700}
 .legend{display:flex;gap:.5rem;flex-wrap:wrap;margin:.75rem 0}.legend span{padding:.2rem .5rem;border:1px solid var(--line);font-size:.8rem}
 a{color:var(--accent)}.team small{font-weight:600}
-@media(max-width:700px){main{padding:1rem max(.75rem,env(safe-area-inset-right)) 2rem max(.75rem,env(safe-area-inset-left))}.table-wrap{max-height:75vh}th.match{min-width:155px;max-width:155px}thead th:first-child{min-width:155px}table{min-width:1020px}th,td{padding:.6rem .5rem}}
+@media(max-width:700px){main{padding:1rem max(.75rem,env(safe-area-inset-right)) 2rem max(.75rem,env(safe-area-inset-left))}.table-wrap{max-height:75vh}th.match{min-width:155px;max-width:155px}thead th:first-child{min-width:155px}table{min-width:1450px}th,td{padding:.6rem .5rem}}
+[hidden]{display:none!important}.filters{margin:1rem 0;padding:1rem;border:1px solid var(--line);background:white}.filter-head{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap}.filter-head button{font-size:.85rem;min-height:44px}.filter-options{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr));gap:.25rem .75rem;margin-top:.5rem}.filters label{display:flex;align-items:center;gap:.6rem;min-height:44px;cursor:pointer}.filters input{width:20px;height:20px;flex-shrink:0;accent-color:var(--accent)}.column-options{display:flex;gap:1.5rem;flex-wrap:wrap}.hide-corners [data-kind="corners"],.hide-goals [data-kind="goals"]{display:none}
+.lineup-names{font-size:.8rem;line-height:1.55;text-align:left}.lineup-names span{display:block}
 </style>
 </head>
 <body><main>
@@ -33,18 +35,22 @@ a{color:var(--accent)}.team small{font-weight:600}
 <p id="status" role="status">正在讀取今日場次…</p>
 <p class="note">每隊最近 10 場賽前已完場馬會紀錄。主隊取主場、客隊取作客拆分。數字下方列有效樣本；上色用未四捨五入數值。</p>
 <div class="legend"><span class="green">綠色 ≥ 指定門檻</span><span class="red">紅色 ＜ 指定門檻</span><span class="missing">— 欠資料</span></div>
-<p class="note">手機可左右滑表格，場次欄會固定。按香港日期整合今日馬會賽程及已完場賽果。</p>
-<div class="table-wrap" role="region" aria-label="今日場次角球及得失球比較表，可左右滑動" tabindex="0">
-<table>
+<p class="note">手機可左右滑表格，場次欄會固定。只列香港日期今日、馬會端點提供嘅未完場賽事。</p>
+<fieldset class="filters"><legend>篩選賽事</legend><div class="filter-head"><button id="select-all" type="button">全選</button><button id="select-none" type="button">全不選</button><span id="selection-count" role="status"></span></div><p class="note">預設全選，取消勾選即可隱藏該場主客兩隊。</p><div id="fixture-options" class="filter-options"></div></fieldset>
+<fieldset class="filters"><legend>顯示數據</legend><div class="column-options"><label><input id="show-corners" type="checkbox" checked>角球</label><label><input id="show-goals" type="checkbox" checked>入球（半場／全場）</label></div></fieldset>
+<p id="no-selection" hidden role="status">未選擇賽事，請勾選場次或按「全選」。</p>
+<div id="comparison" class="table-wrap" role="region" aria-label="今日場次角球及得失球比較表，可左右滑動" tabindex="0">
+<table id="comparison-table">
 <thead><tr>
 <th scope="col">場次</th><th scope="col">球隊</th>
-<th scope="col">場均半場總角球<small>≥ 5 綠</small></th>
-<th scope="col">場均全場總角球<small>≥ 9.5 綠</small></th>
-<th scope="col">場均全場角球<br>取得／失去<small>合計 ≥ 10 綠</small></th>
-<th scope="col">主隊主場／客隊作客<br>入球／失球<small>各數值 ≥ 2.0 綠</small></th>
-<th scope="col">主場／作客角球<br>取得／失去<small>合計 ≥ 10 綠</small></th>
+<th scope="col" data-kind="corners">場均半場總角球<small>≥ 5 綠</small></th>
+<th scope="col" data-kind="corners">場均全場總角球<small>≥ 9.5 綠</small></th>
+<th scope="col" data-kind="corners">場均全場角球<br>取得／失去<small>合計 ≥ 10 綠</small></th>
+<th scope="col" data-kind="goals">主隊主場／客隊作客<br>半場入球／失球<small>各數值 ≥ 1.0 綠</small></th>
+<th scope="col" data-kind="goals">主隊主場／客隊作客<br>全場入球／失球<small>各數值 ≥ 2.0 綠</small></th>
+<th scope="col" data-kind="corners">主場／作客角球<br>取得／失去<small>合計 ≥ 10 綠</small></th><th scope="col">輪換情況<small>多過 4 人紅</small></th><th scope="col">前三射手是否正選<small>有人未正選紅</small></th>
 </tr></thead><tbody id="matches"></tbody>
 </table></div>
 <p class="note">總角球可使用只提供合計嘅紀錄；取得／失去須有分隊數字，兩者樣本數可能不同。主客拆分以近 10 場內嘅相關場次計算。</p>
-<p class="note">資料來源 <a href="https://bet.hkjc.com/ch/football/home" target="_blank" rel="noopener">香港賽馬會足球</a>。色彩表示數值達標情況。</p>
-</main><script type="module" src="app.js?v=2"></script></body></html>
+<p class="note">輪換以近 5 場正選比較：最少 3 場完整名單，過半場次正選列為常用正選，最少 8 人先分類。入球前三名按今場賽項同球季有統計球員排名，同球數按姓名排序；名單未公布或統計不齊會標明未確認。球員資料來自 ESPN。</p><p class="note">資料來源 <a href="https://bet.hkjc.com/ch/football/home" target="_blank" rel="noopener">香港賽馬會足球</a>。色彩表示數值達標情況。</p>
+</main><script type="module" src="app.js?v=4"></script></body></html>

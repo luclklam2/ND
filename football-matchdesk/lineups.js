@@ -69,6 +69,7 @@ function compare(current,previous) {
 
 function append(parent,tag,value) {
   const node = document.createElement(tag);
+  if(tag==='details') node.open=true;
   node.textContent = value;
   parent.append(node);
   return node;

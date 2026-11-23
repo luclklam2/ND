@@ -97,6 +97,7 @@ export function scoreAnalysis(match,homeRows,awayRows) {
 
 function add(parent,tag,value) {
   const node = document.createElement(tag);
+  if(tag==='details') node.open=true;
   node.textContent = value;
   parent.append(node);
   return node;
@@ -137,6 +138,7 @@ export async function showScoreAnalysis(target,match,histories,signal) {
     +' · 客隊 '+a.scored.toFixed(2)+'／'+a.conceded.toFixed(2)+'（已按可用主客樣本調整）');
   add(target,'p','主隊近期主場 '+h.split+' 場 · 客隊近期作客 '+a.split+' 場。每邊相關樣本滿 3 場先加權。');
   const details = add(target,'details','');
+  details.open=false;
   add(details,'summary','用 ChatGPT 分析呢場比分');
   add(details,'p','複製以下資料到 ChatGPT，就可以就呢場再分析。');
   const prompt = [

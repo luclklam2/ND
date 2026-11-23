@@ -1,9 +1,9 @@
-import { showExpanded } from './expanded.js?v=20261123tidy';
-import { setMatchOverview, showComparison } from './view.js?v=20261123tidy';
-import { showScorers } from './scorers.js?v=20261123tidy';
-import { showScoreAnalysis } from './score.js?v=20261123tidy';
+import { showExpanded } from './expanded.js?v=20261123focus';
+import { setMatchOverview, showComparison } from './view.js?v=20261123focus';
+import { showScorers } from './scorers.js?v=20261123focus';
+import { showScoreAnalysis } from './score.js?v=20261123focus';
 import { formatResult, resultTotal, summarize } from './form.js';
-import { lookup, showLineups } from './lineups.js?v=20261123tidy';
+import { lookup, showLineups } from './lineups.js?v=20261123focus';
 import { inSeason, seasonSchedules } from './season.js';
 const endpoint = 'https://info.cld.hkjc.com/graphql/base/';
 const element = id => document.getElementById(id);
@@ -269,6 +269,8 @@ async function selectFixture() {
   const match = matches.find(m=>m.id===fixture.value);
   element('details').hidden = !match;
   if (!match) return;
+  element('focusAlerts').replaceChildren();
+  element('focusAlerts').hidden=true;
   setMatchOverview(match);
   element('selected').textContent = name(match);
   const venue = match.venue?.name_ch || match.venue?.name_en;

@@ -32,10 +32,18 @@ export function historicalLine(rows,type,stage,condition) {
   return {n:totals.length,over:over/totals.length,under:under/totals.length,push:push/totals.length};
 }
 
+export function marketDirection(values,confirmed,quoted) {
+  if (!quoted) return {label:'未有盤口',tone:'neutral'};
+  if (!confirmed) return {label:'資料待核實',tone:'neutral'};
+  if (values.some(value=>!value || value.n<5)) return {label:'樣本不足',tone:'neutral'};
+  if (values.every(value=>value.over>=.6)) return {label:'偏大',tone:'over'};
+  if (values.every(value=>value.under>=.6)) return {label:'偏細',tone:'under'};
+  return {label:'未有一致方向',tone:'neutral'};
+}
 export function showMarketSummary(match,rows,confirmed) {
   const target=document.getElementById('quickSummary');
   target.replaceChildren();
-  add(target,'p',confirmed?'同球季已收錄賽果 · 各範圍獨立計算':'過去 360 日同賽項已收錄賽果 · 同球季未確認，可能跨季');
+  add(target,'p','歷史方向 · 優先睇四個市場，按今場盤線比較兩隊近 20 場。');
   const games=[...new Map(rows.flat().filter(row=>
     [match.homeTeam.id,match.awayTeam.id].every(id=>[row.homeTeam.id,row.awayTeam.id].includes(id)))
     .map(row=>[row.id,row])).values()].sort((a,b)=>Date.parse(b.kickOffTime)-Date.parse(a.kickOffTime)).slice(0,20);
@@ -48,7 +56,7 @@ export function showMarketSummary(match,rows,confirmed) {
     return value;
   }
   for(const [code,[label,type,stage]] of Object.entries(markets)){
-    const card=add(grid,'div','');card.className='surface';
+    const card=add(grid,'div','');card.className='surface direction-card';
     add(card,'h3',label+'大細');
     const pools=(match.foPools ?? []).filter(pool=>pool.oddsType===code && pool.status==='SELLINGSTARTED');
     const available=pools.flatMap(pool=>(pool.lines ?? []).filter(line=>line.status==='AVAILABLE' &&
@@ -56,13 +64,19 @@ export function showMarketSummary(match,rows,confirmed) {
     const quote=available.find(item=>item.line.main) ?? available[0];
     const line=quote?quote.line.condition:defaults[code];
     add(card,'p',quote?'馬會'+(quote.line.main?'主盤':'在售盤')+' '+line:'參考線 '+line+' · 暫無在售盤');
+    const values=rows.map(sample=>historicalLine(sample.slice(0,20),type,stage,line));
+    const direction=marketDirection(values,confirmed,Boolean(quote));
+    card.className+=' direction-'+direction.tone;
+    add(card,'strong',direction.label).className='direction-label';
     if(quote){
       add(card,'small',quote.line.combinations.filter(c=>c.status==='AVAILABLE' && Number(c.currentOdds)>1)
         .map(c=>(c.str==='H'?'大':c.str==='L'?'細':c.str)+' @ '+c.currentOdds).join('／'));
       const time=Date.parse(quote.pool.updateAt);
       if(Number.isFinite(time))add(card,'small','報價更新 '+new Intl.DateTimeFormat('zh-HK',{timeZone:'Asia/Hong_Kong',dateStyle:'short',timeStyle:'short'}).format(time));
     }
-    const table=add(card,'table','');
+    const detail=add(card,'details','');
+    add(detail,'summary','睇近 5／10／15／20 場及交手');
+    const table=add(detail,'table','');
     const head=add(table,'thead',''),titles=add(head,'tr','');
     ['範圍','主隊','客隊'].forEach(text=>add(titles,'th',text).scope='col');
     const body=add(table,'tbody','');
@@ -75,7 +89,9 @@ export function showMarketSummary(match,rows,confirmed) {
     add(meeting,'th','雙方交手').scope='row';
     cell(meeting,games,type,stage,line).colSpan=2;
   }
-  add(target,'small','大／細係歷史比例，按有效場數計算；分盤按兩條線各半計。近況包括主客場，交手只計本次同賽項載入範圍，最多 20 場並去重。此摘要獨立於下方近況篩選。');
+  const method=add(target,'details','');
+  add(method,'summary','方向點計？');
+  add(method,'p','偏大／偏細係歷史傾向，唔係投注推介。須確認同季及有在售盤，每隊最少 5 場有效樣本，而且兩隊近 20 場都至少 60% 指向同一邊；其餘顯示未有一致方向。60% 係顯示規則，未經回測校準。分盤按兩條線各半計；交手只計本次載入範圍，最多 20 場。');
 }
 export async function showExpanded(match,histories,confirmed,signal) {
   const target=document.getElementById('expanded');
@@ -85,7 +101,7 @@ export async function showExpanded(match,histories,confirmed,signal) {
   if(signal.aborted) return;
   target.replaceChildren();
   add(target,'p',confirmed?'以下以 ESPN 同球季賽程核對馬會已完場紀錄。':'未能確認同球季，以下暫用過去 360 日同賽項紀錄，可能跨季。');
-  if(results.some(r=>r.status==='rejected')) {add(target,'p','部分歷史賽果讀取失敗，請 Refresh。');document.getElementById('quickSummary').textContent='部分歷史賽果讀取失敗，Summary 暫未能計算。';return;}
+  if(results.some(r=>r.status==='rejected')) {add(target,'p','部分歷史賽果讀取失敗，請 Refresh。');showMarketSummary(match,results.map(r=>r.status==='fulfilled'?r.value:[]),false);add(document.getElementById('quickSummary'),'small','部分歷史賽果讀取失敗，方向暫未確認。請 Refresh 再試。');return;}
   const rows=results.map(r=>r.value);
   showMarketSummary(match,rows,confirmed);
   const controls=add(target,'label','配對樣本範圍');

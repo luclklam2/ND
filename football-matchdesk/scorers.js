@@ -101,9 +101,13 @@ export async function showScorers(target,match,signal,getMatch) {
           if(state==='未見列入今場名單') {
             line.textContent='⚠ 射門主力未列名 · '+line.textContent;
             line.className='alert alert-danger';
+            const focus=document.getElementById('focusAlerts');
+            if(focus){focus.hidden=false;add(focus,'p',(side==='home'?match.homeTeam:match.awayTeam).name_ch+' · '+line.textContent).className='alert alert-danger';}
           } else if(state==='今場後備') {
             line.textContent='⚠ 射門主力未正選 · '+line.textContent;
             line.className='alert';
+            const focus=document.getElementById('focusAlerts');
+            if(focus){focus.hidden=false;add(focus,'p',(side==='home'?match.homeTeam:match.awayTeam).name_ch+' · '+line.textContent).className='alert';}
           }
         }
         const link = add(card,'a','ESPN 球隊統計');

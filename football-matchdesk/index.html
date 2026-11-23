@@ -61,6 +61,11 @@ article a{overflow-wrap:anywhere}
 #scoreAnalysis{gap:1rem}#scoreAnalysis textarea{font-size:16px}
 }
 .alert{background:#fff0dd;border-left:4px solid #a85100;padding:.75rem;font-weight:650}.alert-danger{background:#f8dcda;border-left-color:#a02124}
+#quickSummary table{table-layout:fixed}
+#quickSummary th,#quickSummary td{white-space:normal;overflow-wrap:anywhere;padding:.5rem .3rem}
+#quickSummary th:first-child{width:25%}
+#quickSummary small{margin-top:.25rem}
+@media(max-width:700px){#quickSummary table{font-size:14px}}
 </style>
 </head>
 <body>
@@ -72,7 +77,7 @@ article a{overflow-wrap:anywhere}
 </div>
 <div id="details" hidden>
 <div class="match-head"><h2 id="selected"></h2><p id="meta" class="note"></p><p id="venue" class="note"></p><span id="countdown"></span></div>
-<div class="filters"><label for="sampleSize">近況樣本</label><select id="sampleSize"><option value="10">最近 10 場</option><option value="5">最近 5 場</option><option value="20">最近 20 場</option></select><label><input id="sameOnly" type="checkbox"> 只顯示今場賽項</label><span class="note">套用概覽、入球角球及近期交手</span></div>
+<section><h2>Summary · 入球與角球大細</h2><div id="quickSummary" aria-live="polite"></div></section><div class="filters"><label for="sampleSize">近況樣本</label><select id="sampleSize"><option value="10">最近 10 場</option><option value="5">最近 5 場</option><option value="15">最近 15 場</option><option value="20">最近 20 場</option></select><label><input id="sameOnly" type="checkbox"> 只顯示今場賽項</label><span class="note">套用概覽、入球角球及近期交手</span></div>
 <div id="panel-overview">
 <section><h2>兩隊資料覆蓋</h2><div class="surface" id="coverage" aria-live="polite"></div></section>
 <section><h2>兩隊近況比較</h2><p class="note">每格列出數值同有效場數。場均全場總角球大過 9.5、半場大過 4.5 用綠底，低過用紅底，等於條線保留中性色；按未四捨五入均值比較。主隊主場、客隊作客只計所選近況樣本內嘅對應場次。</p><article id="comparison" class="table" aria-live="polite"></article></section>
@@ -92,5 +97,5 @@ article a{overflow-wrap:anywhere}
 </div>
 <section class="note">比分與角球來源 <a href="https://bet.hkjc.com/ch/football/home" target="_blank" rel="noopener">香港賽馬會足球</a>，只涵蓋馬會收錄場次。球員與陣容來源 ESPN，各區顯示資料覆蓋。</section>
 </main>
-<script type="module" src="app.js?v=20261123fix"></script>
+<script type="module" src="app.js?v=20261123summary"></script>
 </body></html>

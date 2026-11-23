@@ -1,9 +1,9 @@
-import { showExpanded } from './expanded.js?v=20261123';
-import { setMatchOverview, showComparison } from './view.js?v=20261123';
-import { showScorers } from './scorers.js?v=20261123';
-import { showScoreAnalysis } from './score.js?v=20261123';
+import { showExpanded } from './expanded.js?v=20261123summary';
+import { setMatchOverview, showComparison } from './view.js?v=20261123summary';
+import { showScorers } from './scorers.js?v=20261123summary';
+import { showScoreAnalysis } from './score.js?v=20261123summary';
 import { formatResult, resultTotal, summarize } from './form.js';
-import { lookup, showLineups } from './lineups.js?v=20261123';
+import { lookup, showLineups } from './lineups.js?v=20261123summary';
 import { inSeason, seasonSchedules } from './season.js';
 const endpoint = 'https://info.cld.hkjc.com/graphql/base/';
 const element = id => document.getElementById(id);
@@ -238,6 +238,7 @@ async function showSeason(match,start,signal,getMatch) {
   if (!match.tournament?.code) {
     status.textContent = '馬會未提供賽事代碼，暫時無法篩選同賽項。';
     element('expanded').textContent = '欠賽項代碼，暫未能取得同季攻守配對樣本。';
+    element('quickSummary').textContent = '欠賽項代碼，Summary 暫未能計算。';
     return;
   }
   status.textContent = '正在配對今場賽季及歷史賽果…';
@@ -274,6 +275,7 @@ async function selectFixture() {
   element('venue').textContent = venue ? '球場 '+venue : '馬會場次資料暫未有球場';
   showMeetings(match, [], selection.signal, true);
   element('expanded').textContent = '正在核對同球季資料…';
+  element('quickSummary').textContent = '正在整理近 5／10／15／20 場及雙方交手…';
   element('meta').textContent =[match.frontEndId,match.tournament?.name_ch || match.tournament?.name_en,localTime.format(kickoff(match))+' 香港時間'].filter(Boolean).join(' · ');
   const start = dayStart(localDay.format(Math.min(Date.now(),kickoff(match))))-359*dayMs;
   const signal = selection.signal;

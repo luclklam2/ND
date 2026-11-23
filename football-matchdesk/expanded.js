@@ -32,6 +32,51 @@ export function historicalLine(rows,type,stage,condition) {
   return {n:totals.length,over:over/totals.length,under:under/totals.length,push:push/totals.length};
 }
 
+export function showMarketSummary(match,rows,confirmed) {
+  const target=document.getElementById('quickSummary');
+  target.replaceChildren();
+  add(target,'p',confirmed?'同球季已收錄賽果 · 各範圍獨立計算':'過去 360 日同賽項已收錄賽果 · 同球季未確認，可能跨季');
+  const games=[...new Map(rows.flat().filter(row=>
+    [match.homeTeam.id,match.awayTeam.id].every(id=>[row.homeTeam.id,row.awayTeam.id].includes(id)))
+    .map(row=>[row.id,row])).values()].sort((a,b)=>Date.parse(b.kickOffTime)-Date.parse(a.kickOffTime)).slice(0,20);
+  const grid=add(target,'div','');grid.className='grid';
+  const defaults={FHL:'0.5',HIL:'2.5',FCH:'4.5',CHL:'9.5'};
+  function cell(parent,sample,type,stage,line) {
+    const result=historicalLine(sample,type,stage,line);
+    const value=add(parent,'td',result?'大 '+(result.over*100).toFixed(0)+'%／細 '+(result.under*100).toFixed(0)+'%':'欠有效樣本');
+    if(result) add(value,'small',result.n+' 場'+(result.push?' · 走 '+(result.push*100).toFixed(0)+'%':''));
+    return value;
+  }
+  for(const [code,[label,type,stage]] of Object.entries(markets)){
+    const card=add(grid,'div','');card.className='surface';
+    add(card,'h3',label+'大細');
+    const pools=(match.foPools ?? []).filter(pool=>pool.oddsType===code && pool.status==='SELLINGSTARTED');
+    const available=pools.flatMap(pool=>(pool.lines ?? []).filter(line=>line.status==='AVAILABLE' &&
+      (line.combinations ?? []).some(c=>c.status==='AVAILABLE' && Number(c.currentOdds)>1)).map(line=>({pool,line})));
+    const quote=available.find(item=>item.line.main) ?? available[0];
+    const line=quote?quote.line.condition:defaults[code];
+    add(card,'p',quote?'馬會'+(quote.line.main?'主盤':'在售盤')+' '+line:'參考線 '+line+' · 暫無在售盤');
+    if(quote){
+      add(card,'small',quote.line.combinations.filter(c=>c.status==='AVAILABLE' && Number(c.currentOdds)>1)
+        .map(c=>(c.str==='H'?'大':c.str==='L'?'細':c.str)+' @ '+c.currentOdds).join('／'));
+      const time=Date.parse(quote.pool.updateAt);
+      if(Number.isFinite(time))add(card,'small','報價更新 '+new Intl.DateTimeFormat('zh-HK',{timeZone:'Asia/Hong_Kong',dateStyle:'short',timeStyle:'short'}).format(time));
+    }
+    const table=add(card,'table','');
+    const head=add(table,'thead',''),titles=add(head,'tr','');
+    ['範圍','主隊','客隊'].forEach(text=>add(titles,'th',text).scope='col');
+    const body=add(table,'tbody','');
+    for(const n of [5,10,15,20]){
+      const row=add(body,'tr','');
+      add(row,'th','近 '+n+' 場').scope='row';
+      rows.forEach(sample=>cell(row,sample.slice(0,n),type,stage,line));
+    }
+    const meeting=add(body,'tr','');
+    add(meeting,'th','雙方交手').scope='row';
+    cell(meeting,games,type,stage,line).colSpan=2;
+  }
+  add(target,'small','大／細係歷史比例，按有效場數計算；分盤按兩條線各半計。近況包括主客場，交手只計本次同賽項載入範圍，最多 20 場並去重。此摘要獨立於下方近況篩選。');
+}
 export async function showExpanded(match,histories,confirmed,signal) {
   const target=document.getElementById('expanded');
   target.replaceChildren();
@@ -40,12 +85,13 @@ export async function showExpanded(match,histories,confirmed,signal) {
   if(signal.aborted) return;
   target.replaceChildren();
   add(target,'p',confirmed?'以下以 ESPN 同球季賽程核對馬會已完場紀錄。':'未能確認同球季，以下暫用過去 360 日同賽項紀錄，可能跨季。');
-  if(results.some(r=>r.status==='rejected')) {add(target,'p','部分歷史賽果讀取失敗，請 Refresh。');return;}
+  if(results.some(r=>r.status==='rejected')) {add(target,'p','部分歷史賽果讀取失敗，請 Refresh。');document.getElementById('quickSummary').textContent='部分歷史賽果讀取失敗，Summary 暫未能計算。';return;}
   const rows=results.map(r=>r.value);
+  showMarketSummary(match,rows,confirmed);
   const controls=add(target,'label','配對樣本範圍');
   const select=add(controls,'select','');
   select.setAttribute('aria-label','配對樣本範圍');
-  for(const size of [5,10,20]) {const option=add(select,'option','近 '+size+' 場');option.value=size;}
+  for(const size of [5,10,15,20]) {const option=add(select,'option','近 '+size+' 場');option.value=size;}
   select.value='20';
   const content=add(target,'div','');
   function render(){
@@ -53,13 +99,13 @@ export async function showExpanded(match,histories,confirmed,signal) {
     const size=Number(select.value);
     const selected=rows.map(team=>team.slice(0,size));
     for(const [code,[label,type,stage]] of Object.entries(markets)){
-      add(content,'h3',label+' · 近 5／10／20 場');
+      add(content,'h3',label+' · 近 5／10／15／20 場');
       const wrap=add(content,'div','');wrap.className='table';
       const table=add(wrap,'table','');
       const head=add(table,'thead',''), tr=add(head,'tr','');
       ['範圍','主隊主場取得／失去','客隊作客取得／失去','攻守配對均值（主／客／合計）'].forEach(text=>add(tr,'th',text).scope='col');
       const body=add(table,'tbody','');
-      for(const n of [5,10,20]){
+      for(const n of [5,10,15,20]){
         const h=splitStats(rows[0].slice(0,n),match.homeTeam.id,true,type,stage);
         const a=splitStats(rows[1].slice(0,n),match.awayTeam.id,false,type,stage);
         const pair=pairRates(h,a);

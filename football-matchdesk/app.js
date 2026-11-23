@@ -45,10 +45,18 @@ async function loadFixtures() {
   const status = element('status');
   status.textContent = '正在更新馬會場次…';
   try {
-    const data = await request('footballMatchesQuery', {
-      fbOddsTypes:['HAD','HIL','FHL','CHL','FCH'],fbOddsTypesM:['HAD'],showAllMatch:false,
+    const variables = {
+      fbOddsTypes:['HIL','FHL','CHL','FCH'],fbOddsTypesM:['HAD'],showAllMatch:false,
       inplayOnly:false,featuredMatchesOnly:false,earlySettlementOnly:false
-    }, new AbortController().signal);
+    };
+    let data;
+    let oddsUnavailable = false;
+    try {
+      data = await request('footballMatchesQuery',variables,new AbortController().signal);
+    } catch {
+      data = await request('footballMatchesQuery',{...variables,fbOddsTypes:['HAD']},new AbortController().signal);
+      oddsUnavailable = true;
+    }
     const previous = fixture.value;
     matches = data.matches.filter(m => m.homeTeam && m.awayTeam && Number.isFinite(kickoff(m)))
       .sort((a,b) => kickoff(a)-kickoff(b));
@@ -58,7 +66,7 @@ async function loadFixtures() {
     }
     fixture.disabled = !matches.length;
     if (matches.some(m => m.id === previous)) fixture.value = previous;
-    status.textContent = '已更新 ' + localTime.format(Date.now()) + '（香港時間） · ' + matches.length + ' 場';
+    status.textContent = '已更新 ' + localTime.format(Date.now()) + '（香港時間） · ' + matches.length + ' 場'+(oddsUnavailable?' · 大細盤未能取得，可稍後 Refresh。':'');
     await selectFixture();
   } catch (error) {
     status.textContent = '更新失敗。' + error.message + '。' + (matches.length ? '仍顯示上次成功取得嘅場次。' : '請再按 REFRESH。');

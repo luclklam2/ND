@@ -1,9 +1,9 @@
-import { showExpanded } from './expanded.js?v=20261123clear';
-import { setMatchOverview, showComparison } from './view.js?v=20261123clear';
-import { showScorers } from './scorers.js?v=20261123clear';
-import { showScoreAnalysis } from './score.js?v=20261123clear';
-import { formatResult, resultTotal, summarize } from './form.js';
-import { lookup, showLineups } from './lineups.js?v=20261123clear';
+import { showExpanded } from './expanded.js?v=20261123merged';
+import { setMatchOverview, showComparison } from './view.js?v=20261123merged';
+import { showScorers } from './scorers.js?v=20261123merged';
+import { showScoreAnalysis } from './score.js?v=20261123merged';
+import { formatResult, resultTotal } from './form.js';
+import { lookup, showLineups } from './lineups.js?v=20261123merged';
 import { inSeason, seasonSchedules } from './season.js';
 const endpoint = 'https://info.cld.hkjc.com/graphql/base/';
 const element = id => document.getElementById(id);
@@ -120,22 +120,12 @@ function add(parent, tag, value) {
   return node;
 }
 
-function renderTable(card, rows, teamId) {
+function renderTable(card, rows) {
   if (!rows.length) {
     add(card,'p','呢段期間未搵到符合條件嘅馬會賽果。');
     return;
   }
   add(card,'p',rows.length+' 場');
-  if (teamId) {
-    const stats = add(card,'dl');
-    stats.className = 'metrics';
-    for (const [label,value,samples] of summarize(rows,teamId)) {
-      const item = add(stats,'div');
-      add(item,'dt',label);
-      add(item,'dd',value);
-      add(item,'small','樣本 '+samples+'/'+rows.length+' 場');
-    }
-  }
   const wrapper = add(card,'div');
   wrapper.className = 'table';
   wrapper.tabIndex = 0;
@@ -175,11 +165,7 @@ async function loadPanels(target, match, start, sameSeason, signal, histories = 
       const rows = await (histories[i] ?? history(team,match,start,sameSeason,signal));
       if (signal.aborted) return;
       loading.remove();
-      if (!sameSeason && rows.length) {
-        const hours = Math.round((kickoff(match)-kickoff(rows[0]))/3600000);
-        add(card,'p','距上場開波約 '+Math.floor(hours/24)+' 日 '+hours%24+' 小時');
-      }
-      renderTable(card,rows,team.id);
+      renderTable(card,rows);
     } catch (error) {
       if (!signal.aborted) loading.textContent = '未能載入賽果。' + error.message + '。請重新選擇或刷新。';
     }
@@ -212,6 +198,32 @@ function showMeetings(match, results, signal, loading=false) {
 
 let recentView;
 
+async function showHistory() {
+  if(!recentView) return;
+  recentView.historyRender?.abort();
+  recentView.historyRender=new AbortController();
+  const {match,start,histories,seasonHistories,seasonLabel}=recentView;
+  const signal=AbortSignal.any([selection.signal,recentView.historyRender.signal]);
+  const scope=element('historySize').value;
+  const target=element('recent');
+  if(scope==='season' && !match.tournament?.code){
+    target.replaceChildren();
+    add(target,'p','欠賽項代碼，無法取得同季紀錄。');
+    return;
+  }
+  if(scope==='season' && !seasonHistories){
+    target.replaceChildren();
+    add(target,'p','同季資料核對中，請稍候。');
+    element('seasonStatus').textContent=seasonLabel || '正在核對同球季…';
+    return;
+  }
+  const onlySame=element('sameOnly').checked;
+  const source=scope==='season'?seasonHistories:histories.map(promise=>promise.then(rows=>
+    rows.slice(0,Number(scope)).filter(row=>!onlySame || row.tournament?.code===match.tournament?.code)));
+  element('seasonStatus').textContent=scope==='season'?seasonLabel:'最近 '+scope+' 場'+(onlySame?' · 只計今場賽項':' · 各賽項');
+  await loadPanels(target,match,start,scope==='season',signal,source);
+}
+
 async function showRecent() {
   if (!recentView) return;
   const {match,start,histories} = recentView;
@@ -224,7 +236,7 @@ async function showRecent() {
   const visible = histories.map(promise=>promise.then(rows=>rows.slice(0,count).filter(row=>!onlySame || (code && row.tournament?.code===code))));
   showMeetings(match,[],signal,true);
   await Promise.all([
-    loadPanels(element('recent'),match,start,onlySame,signal,visible),
+    showHistory(),
     showScoreAnalysis(element('scoreAnalysis'),match,visible,signal),
     showComparison(match,visible,signal,histories),
     Promise.allSettled(visible).then(results=>showMeetings(match,results,signal))
@@ -232,13 +244,12 @@ async function showRecent() {
 }
 
 async function showSeason(match,start,signal,getMatch) {
-  const target = element('same');
-  target.replaceChildren();
   const status = element('seasonStatus');
   if (!match.tournament?.code) {
     status.textContent = '馬會未提供賽事代碼，暫時無法篩選同賽項。';
     element('expanded').textContent = '欠賽項代碼，暫未能取得同季攻守配對樣本。';
     element('quickSummary').textContent = '欠賽項代碼，Summary 暫未能計算。';
+    if(recentView?.match.id===match.id) recentView.seasonLabel=status.textContent;
     return;
   }
   status.textContent = '正在配對今場賽季及歷史賽果…';
@@ -258,11 +269,15 @@ async function showSeason(match,start,signal,getMatch) {
     const rows = await history(team,match,first,true,signal);
     return schedule ? inSeason(rows,schedule.events) : rows;
   });
-  await Promise.all([loadPanels(target,match,start,true,signal,histories),showExpanded(match,histories,Boolean(schedules),signal)]);
+  if(signal.aborted || recentView?.match.id!==match.id) return;
+  recentView.seasonHistories=histories;
+  recentView.seasonLabel=status.textContent;
+  await Promise.all([showHistory(),showExpanded(match,histories,Boolean(schedules),signal)]);
 }
 
 async function selectFixture() {
   recentView?.render?.abort();
+  recentView?.historyRender?.abort();
   recentView = null;
   selection.abort();
   selection = new AbortController();
@@ -294,6 +309,7 @@ async function selectFixture() {
 
 element('sameOnly').addEventListener('change',showRecent);
 element('sampleSize').addEventListener('change',showRecent);
+element('historySize').addEventListener('change',showHistory);
 fixture.addEventListener('change',selectFixture);
 refresh.addEventListener('click',loadFixtures);
 loadFixtures();

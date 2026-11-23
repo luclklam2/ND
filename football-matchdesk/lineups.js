@@ -129,7 +129,7 @@ export function lineupTakeaways(teams) {
 export async function showLineups(target,match,histories,signal,getMatch=lookup(signal)) {
   const summary = document.getElementById('lineupSummary');
   summary.replaceChildren();
-  append(summary,'h3','陣容分析總結');
+  append(summary,'h3','陣容資料覆蓋');
   const pending = append(summary,'p','正在比較兩隊出場人員…');
   target.replaceChildren();
   const current = getMatch(match);
@@ -177,7 +177,6 @@ export async function showLineups(target,match,histories,signal,getMatch=lookup(
       const {regular,missing,label} = comparison;
       if (missing.length>4) {
         const warning='⚠ '+name+' · '+missing.length+' 名常用正選今場未正選。';
-        append(card,'p',warning).className='alert alert-danger';
         const focus=document.getElementById('focusAlerts');
         if(focus){focus.hidden=false;append(focus,'p',warning).className='alert alert-danger';}
       }
@@ -191,7 +190,6 @@ export async function showLineups(target,match,histories,signal,getMatch=lookup(
   }));
   if (signal.aborted) return;
   alternativeSources(target,match);
-  pending.remove();
-  for (const line of lineupTakeaways(teams)) append(summary,'p',line);
+  pending.textContent = '完整正選 '+teams.filter(team=>team?.lineup).length+'/2 隊；輪換詳情見各隊名單。';
   append(summary,'small','位置按近期正選紀錄。輪換跡象只反映人腳變動，缺陣原因及比分影響有待核實。');
 }

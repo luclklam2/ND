@@ -40,6 +40,13 @@ export function marketDirection(values,confirmed,quoted) {
   if (values.every(value=>value.under>=.6)) return {label:'偏細',tone:'under'};
   return {label:'未有一致方向',tone:'neutral'};
 }
+export function summaryQuote(match,code) {
+  const pools=(match.foPools ?? []).filter(pool=>pool.oddsType===code && pool.status==='SELLINGSTARTED');
+  const available=pools.flatMap(pool=>(pool.lines ?? []).filter(line=>line.status==='AVAILABLE' &&
+    (line.combinations ?? []).some(c=>c.status==='AVAILABLE' && Number(c.currentOdds)>1)).map(line=>({pool,line})));
+  return available.find(item=>item.line.main) ?? available[0];
+}
+
 export function showMarketSummary(match,rows,confirmed) {
   const target=document.getElementById('quickSummary');
   target.replaceChildren();
@@ -58,10 +65,7 @@ export function showMarketSummary(match,rows,confirmed) {
   for(const [code,[label,type,stage]] of Object.entries(markets)){
     const card=add(grid,'div','');card.className='surface direction-card';
     add(card,'h3',label+'大細');
-    const pools=(match.foPools ?? []).filter(pool=>pool.oddsType===code && pool.status==='SELLINGSTARTED');
-    const available=pools.flatMap(pool=>(pool.lines ?? []).filter(line=>line.status==='AVAILABLE' &&
-      (line.combinations ?? []).some(c=>c.status==='AVAILABLE' && Number(c.currentOdds)>1)).map(line=>({pool,line})));
-    const quote=available.find(item=>item.line.main) ?? available[0];
+    const quote=summaryQuote(match,code);
     const line=quote?quote.line.condition:defaults[code];
     add(card,'p',quote?'馬會'+(quote.line.main?'主盤':'在售盤')+' '+line:'參考線 '+line+' · 暫無在售盤');
     const values=rows.map(sample=>historicalLine(sample.slice(0,20),type,stage,line));
@@ -130,7 +134,8 @@ export async function showExpanded(match,histories,confirmed,signal) {
       for(const stat of [h,a]) add(row,'td',stat.n?stat.scored.toFixed(2)+'／'+stat.conceded.toFixed(2)+' · '+stat.n+' 場':'欠分隊樣本');
       add(row,'td',pair?[pair.home,pair.away,pair.home+pair.away].map(n=>n.toFixed(2)).join('／'):'每隊相關主客樣本最少 3 場');
       const quotesPanel=add(content,'details','');
-      add(quotesPanel,'summary','各盤線比較');
+      add(quotesPanel,'summary','其他盤線（主盤見頁首）');
+      const mainQuote=summaryQuote(match,code);
       const pools=(match.foPools ?? []).filter(pool=>pool.oddsType===code && pool.status==='SELLINGSTARTED');
       const quoteWrap=add(quotesPanel,'div','');quoteWrap.className='table';
       const quoteTable=add(quoteWrap,'table','');
@@ -142,7 +147,7 @@ export async function showExpanded(match,histories,confirmed,signal) {
         const time=Date.parse(pool.updateAt);
         if(Number.isFinite(time)) add(quotesPanel,'small','更新 '+new Intl.DateTimeFormat('zh-HK',{timeZone:'Asia/Hong_Kong',dateStyle:'short',timeStyle:'short'}).format(time));
         for(const line of pool.lines ?? []){
-          if(line.status!=='AVAILABLE') continue;
+          if(line.status!=='AVAILABLE' || line===mainQuote?.line) continue;
           const selections=(line.combinations ?? []).filter(c=>c.status==='AVAILABLE' && Number(c.currentOdds)>1);
           if(!selections.length) continue;
           quotes++;
@@ -156,7 +161,7 @@ export async function showExpanded(match,histories,confirmed,signal) {
           }
         }
       }
-      if(!quotes){quoteWrap.remove();add(quotesPanel,'p','暫無在售盤');}
+      if(!quotes){quoteWrap.remove();add(quotesPanel,'p','暫無其他在售盤');}
     }
     add(content,'small','攻守配對取主隊主場取得與客隊作客失去嘅平均，客隊反向計。比例屬歷史樣本，分盤按兩條線各半計；今場機率及賠率優勢尚未校準。');
   }

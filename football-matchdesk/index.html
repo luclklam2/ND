@@ -114,19 +114,19 @@ details.surface>summary{padding:.25rem 0}
 <section><h2>兩隊近況比較</h2><p class="note">角球均值高於全場 9.5／半場 4.5 用綠底，低於用紅底。主客拆分只計所選樣本內嘅對應場次。</p><article id="comparison" class="table" aria-live="polite"></article></section>
 </div>
 <section><h2>同季攻守配對及實際大細盤</h2><article id="expanded" aria-live="polite"></article></section><div id="panel-analysis">
-<section><h2>比分參考</h2><p class="note">按近期得失球試算，模型未經回測校準。角球詳細樣本可展開查看。</p><article id="scoreAnalysis" aria-live="polite"></article></section>
+<section><h2>比分參考</h2><p class="note">按近期得失球試算，模型未經回測校準。</p><article id="scoreAnalysis" aria-live="polite"></article></section>
 </div>
 <div id="panel-squad">
-<section><h2>陣容及隊內射手</h2><p class="note">左邊主隊，右邊客隊。入球榜按今場賽項同球季，名單未公布時顯示未確認。</p><article id="lineupSummary" aria-live="polite"></article><div class="squad-grid"><div id="lineups" aria-live="polite"></div><div id="scorers" aria-live="polite"></div></div>
+<section><h2>陣容及隊內射手</h2><p class="note">左邊主隊，右邊客隊。入球前五與射門前二合併顯示，按今場賽項同球季統計。</p><article id="lineupSummary" aria-live="polite"></article><div class="squad-grid"><div id="lineups" aria-live="polite"></div><div id="scorers" aria-live="polite"></div></div>
 <details open class="surface"><summary>輪換分類點計</summary><p>比較最近 5 場有收錄嘅賽事，最少 3 場完整陣容。過半場次正選列為常用正選，最少 8 人先分類。缺 0–1 人屬接近常用正選，2–3 人屬部分輪換，4 人以上屬明顯輪換跡象。</p></details></section>
 </div>
 <div id="panel-history">
-<section><h2>近期賽果</h2><p class="note">每場按歷史主隊–客隊排列。綠底代表達到門檻，紅底代表低於門檻。半場／全場入球門檻 2／3，角球門檻 4／9。— 代表欠資料。</p><div class="grid" id="recent" aria-live="polite"></div></section>
+<section><h2>賽果紀錄</h2><label for="historySize">顯示範圍</label><select id="historySize"><option value="5">近 5 場</option><option value="10" selected>近 10 場</option><option value="15">近 15 場</option><option value="20">近 20 場</option><option value="season">同季全部</option></select><p id="seasonStatus" class="note" role="status"></p><p class="note">每場按歷史主隊–客隊排列。綠底代表達到門檻，紅底代表低於門檻。半場／全場入球門檻 2／3，角球門檻 4／9。— 代表欠資料。</p><div class="grid" id="recent" aria-live="polite"></div></section>
 <section><h2>近期交手</h2><p class="note">由所選近況樣本擷取，重複場次只計一次。</p><article id="meetings" aria-live="polite"></article></section>
-<section><details open class="surface"><summary>同賽項 · 同季完整賽果</summary><p id="seasonStatus" class="note" role="status"></p><div class="grid" id="same" aria-live="polite"></div></details></section>
+
 </div>
 </details></div>
 <section class="note">比分與角球來源 <a href="https://bet.hkjc.com/ch/football/home" target="_blank" rel="noopener">香港賽馬會足球</a>，只涵蓋馬會收錄場次。球員與陣容來源 ESPN，各區顯示資料覆蓋。</section>
 </main>
-<script type="module" src="app.js?v=20261123clear"></script>
+<script type="module" src="app.js?v=20261123merged"></script>
 </body></html>

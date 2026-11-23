@@ -51,7 +51,7 @@ export async function showScorers(target,match,signal,getMatch) {
     const sides = header.competitions?.[0]?.competitors ?? [];
     const cards = ['home','away'].map(side=>{
       const card = add(target,'article','');
-      add(card,'h3',(side==='home'?match.homeTeam:match.awayTeam).name_ch+' · 入球頭五名');
+      add(card,'h3',(side==='home'?match.homeTeam:match.awayTeam).name_ch+' · 重點球員');
       return card;
     });
     pending.remove();
@@ -77,44 +77,38 @@ export async function showScorers(target,match,signal,getMatch) {
         if (payload.season.type!==header.season.type) {
           add(card,'p','今場階段：'+header.season.name+'。入球榜使用 ESPN '+season+' 年球季累計，涵蓋範圍可能同今場階段不同。');
         }
-        if (!ranking.players.length) {
-          add(card,'p','暫未取得有入球嘅球員數據。');
-          return;
-        }
-        if (ranking.available<ranking.total) add(card,'p','部分球員統計欠缺，以下係有數據球員嘅入球排序。');
-        const list = add(card,'ol','');
-        for (const player of ranking.players) {
-          const entry = roster?.roster?.find(item=>String(item.athlete?.id)===player.id);
-          const number = [entry?.jersey,entry?.athlete?.jersey,player.jersey]
-            .find(value=>/^\d{1,3}$/.test(String(value ?? '')));
-          const shirt = number===undefined ? '號碼未提供' : '#'+number;
-          add(list,'li',shirt+' '+player.name+' · '+player.goals+' 球 · '+attendance(player.id,roster));
-        }
-
         const shooters=shotLeaders(payload.athletes);
-        add(card,'h3','隊內射門最多兩人');
-        add(card,'small','有射門統計 '+shooters.length+'/'+payload.athletes.length+' 名球員；同數按姓名排序，以下按現有數據排名。');
-        if(!shooters.length) add(card,'p','ESPN 未提供球員射門統計。');
-        for(const player of shooters.filter(player=>player.shots>0).slice(0,2)){
+        const leaders=shooters.filter(player=>player.shots>0).slice(0,2);
+        const goals=new Map(ranking.players.map(player=>[player.id,player]));
+        const shots=new Map(shooters.map(player=>[player.id,player.shots]));
+        const athleteMap=new Map(payload.athletes.map(player=>[String(player.id),player]));
+        const players=[...new Map([...ranking.players,...leaders].map(player=>[player.id,player])).values()];
+        add(card,'small','入球前五名＋射門前兩名，球員去重；射門統計 '+shooters.length+'/'+payload.athletes.length+' 人。');
+        if(ranking.available<ranking.total || shooters.length<payload.athletes.length) add(card,'small','部分統計欠缺，排名按有數據球員計算。');
+        if(!players.length) add(card,'p','欠球員入球及射門統計。');
+        const list=add(card,'ul','');
+        for(const player of players){
+          const athlete=athleteMap.get(player.id);
+          const goal=athlete.statistics?.splits?.categories?.flatMap(category=>category.stats ?? []).find(stat=>stat.name==='totalGoals')?.value;
+          const entry=roster?.roster?.find(item=>String(item.athlete?.id)===player.id);
+          const number=[entry?.jersey,entry?.athlete?.jersey,athlete.jersey].find(value=>/^\d{1,3}$/.test(String(value ?? '')));
+          const shirt=number===undefined?'號碼未提供':'#'+number;
           const state=attendance(player.id,roster);
-          const line=add(card,'p',player.name+' · '+player.shots+' 次射門 · '+state);
-          if(state==='未見列入今場名單') {
-            line.textContent='⚠ 射門主力未列名 · '+line.textContent;
-            line.className='alert alert-danger';
+          const isLeader=leaders.some(leader=>leader.id===player.id);
+          const tags=[goals.has(player.id)?'入球前五':'',isLeader?'射門前二':''].filter(Boolean).join('／');
+          const item=add(list,'li',shirt+' '+player.name+' · '+(Number.isInteger(goal)?goal:'—')+' 球 · '+(shots.get(player.id) ?? '—')+' 次射門 · '+state);
+          add(item,'small',tags);
+          if(isLeader && ['未見列入今場名單','今場後備'].includes(state)){
+            item.className=state==='今場後備'?'alert':'alert alert-danger';
             const focus=document.getElementById('focusAlerts');
-            if(focus){focus.hidden=false;add(focus,'p',(side==='home'?match.homeTeam:match.awayTeam).name_ch+' · '+line.textContent).className='alert alert-danger';}
-          } else if(state==='今場後備') {
-            line.textContent='⚠ 射門主力未正選 · '+line.textContent;
-            line.className='alert';
-            const focus=document.getElementById('focusAlerts');
-            if(focus){focus.hidden=false;add(focus,'p',(side==='home'?match.homeTeam:match.awayTeam).name_ch+' · '+line.textContent).className='alert';}
+            if(focus){focus.hidden=false;add(focus,'p','⚠ '+(side==='home'?match.homeTeam:match.awayTeam).name_ch+' · 射門主力 '+player.name+' · '+state).className=item.className;}
           }
         }
         const link = add(card,'a','ESPN 球隊統計');
         link.href = 'https://www.espn.com/soccer/team/stats/_/id/'+team.id+'/league/'+league+'/season/'+season;
         link.target = '_blank';
         link.rel = 'noopener';
-        add(card,'small','球衣號碼優先按今場名單，欠缺時用球隊登記號碼。同球數按姓名排序，最多顯示五人。今場後備代表列入後備名單。統計係讀取時嘅球季累計，已開波場次可能包括今場入球；未列名球員嘅缺陣原因有待核實。');
+        add(card,'small','球衣號碼優先按今場名單，欠缺時用球隊登記號碼。同數按姓名排序，入球前五與射門前二合併。今場後備代表列入後備名單。統計係讀取時嘅球季累計，已開波場次可能包括今場入球；未列名球員嘅缺陣原因有待核實。');
       } catch (error) {
         if (!signal.aborted) status.textContent = error.name==='TimeoutError' ? 'ESPN 讀取逾時，請 Refresh 重試。' : (error.message || '球員統計讀取失敗，請 Refresh 重試。');
       }

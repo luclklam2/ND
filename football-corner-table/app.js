@@ -39,6 +39,20 @@ async function request(query,variables,signal){
   }
 }
 
+async function todayResults(today,signal){
+  const rows=[];
+  let total;
+  for(let offset=0;total===undefined || offset<total;offset+=20){
+    const data=await request('historicFootballMatchesQuery',{
+      startDate:today,endDate:today,startIndex:offset,endIndex:offset+20,teamId:null
+    },signal);
+    total=Number(data.matchNumByDate?.total);
+    if(!Number.isInteger(total) || total<0 || (!data.matches.length && offset<total)) throw Error('今日賽果紀錄未完整');
+    rows.push(...data.matches);
+  }
+  return rows;
+}
+
 async function history(team,match,asOf,signal){
   const cutoff=Math.min(asOf,Date.parse(match.kickOffTime));
   const last=Date.parse(hkDay.format(cutoff)+'T00:00:00Z');
@@ -112,12 +126,18 @@ async function load(){
   button.disabled=true;
   status.textContent='正在讀取馬會今日場次…';
   try{
-    const data=await request('footballMatchesQuery',{
-      fbOddsTypes:['HAD'],fbOddsTypesM:['HAD'],showAllMatch:false,
-      inplayOnly:false,featuredMatchesOnly:false,earlySettlementOnly:false
-    },signal);
+    const sources=await Promise.allSettled([
+      request('footballMatchesQuery',{
+        fbOddsTypes:['HAD'],fbOddsTypesM:['HAD'],showAllMatch:false,
+        inplayOnly:false,featuredMatchesOnly:false,earlySettlementOnly:false
+      },signal).then(data=>data.matches),
+      todayResults(today,signal)
+    ]);
+    if(sources.every(source=>source.status==='rejected')) throw Error('今日賽程及賽果均未能取得');
+    const partial=sources.some(source=>source.status==='rejected');
+    const listed=sources.flatMap(source=>source.status==='fulfilled'?source.value:[]);
     if(run!==generation) return;
-    const matches=[...new Map(data.matches.filter(match=>match.homeTeam?.id && match.awayTeam?.id &&
+    const matches=[...new Map(listed.filter(match=>match.homeTeam?.id && match.awayTeam?.id &&
       Number.isFinite(Date.parse(match.kickOffTime)) && hkDay.format(Date.parse(match.kickOffTime))===today)
       .map(match=>[match.id,match])).values()].sort((a,b)=>Date.parse(a.kickOffTime)-Date.parse(b.kickOffTime));
     body.replaceChildren();
@@ -128,7 +148,7 @@ async function load(){
         if(i===0){
           const fixture=add(row,'th',match.frontEndId || match.id);
           fixture.className='match';fixture.rowSpan=2;fixture.scope='rowgroup';
-          add(fixture,'small',hkTime.format(Date.parse(match.kickOffTime))+' · '+(Date.parse(match.kickOffTime)<=asOf?'已到開波時間':'未開波'));
+          add(fixture,'small',hkTime.format(Date.parse(match.kickOffTime))+' · '+(Date.parse(match.kickOffTime)<=asOf?(['MATCHENDED','INPLAYMATCHENDED'].includes(match.status)?'已完場':'已到開波時間'):'未開波'));
           add(fixture,'div',name(match.homeTeam)+' vs '+name(match.awayTeam));
           add(fixture,'small',match.tournament?.name_ch || match.tournament?.name_en || '');
         }
@@ -138,10 +158,10 @@ async function load(){
         jobs.push({team,match,cells,home:i===0});
       });
     }
-    if(!matches.length){status.textContent='今日暫無馬會端點列出嘅場次 · 更新 '+hkFull.format(asOf);return;}
+    if(!matches.length){status.textContent=(partial?'部分來源未能取得，暫無可列場次 · 更新 ':'今日暫無馬會場次 · 更新 ')+hkFull.format(asOf);return;}
     let completed=0,failed=0;
     const cache=new Map();
-    const progress=()=>{status.textContent=matches.length+' 場 · 已完成 '+completed+'/'+jobs.length+' 隊'+(failed?' · '+failed+' 隊讀取失敗，可 Refresh 重試':'')+' · 讀取 '+hkFull.format(asOf);};
+    const progress=()=>{status.textContent=(partial?'部分賽程／賽果來源讀取失敗，場次可能未齊 · ':'')+matches.length+' 場 · 已完成 '+completed+'/'+jobs.length+' 隊'+(failed?' · '+failed+' 隊讀取失敗，可 Refresh 重試':'')+' · 讀取 '+hkFull.format(asOf);};
     progress();
     let next=0;
     async function worker(){

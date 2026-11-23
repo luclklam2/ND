@@ -229,6 +229,7 @@ async function showSeason(match,start,signal,getMatch) {
   const status = element('seasonStatus');
   if (!match.tournament?.code) {
     status.textContent = '馬會未提供賽事代碼，暫時無法篩選同賽項。';
+    element('expanded').textContent = '欠賽項代碼，暫未能取得同季攻守配對樣本。';
     return;
   }
   status.textContent = '正在配對今場賽季及歷史賽果…';

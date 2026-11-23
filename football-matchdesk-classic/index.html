@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="description" content="馬會足球賽事、兩隊近況、角球與陣容比較。">
+<title>馬會足球場次研究台</title>
+<style>
+:root{color-scheme:light;--ink:#172e29;--dim:#53665e;--line:#d3ddd7;--accent:#17573f;--paper:#fff;--wash:#f2f4ef}
+*{box-sizing:border-box}[hidden]{display:none!important}body{margin:0;background:var(--wash);color:var(--ink);font:16px/1.6 system-ui,sans-serif}
+header{border-top:6px solid var(--accent);padding:1.5rem 1rem 1rem}main,.wrap{max-width:78rem;margin:auto}main{padding:0 1rem 3rem}
+h1,h2,h3,p{margin:0 0 .65rem}h1{font-size:clamp(1.6rem,4vw,2.5rem);letter-spacing:-.04em}h2{font-size:1.25rem}h3{font-size:1.05rem}header p,.note,small{color:var(--dim)}
+.controls{position:sticky;top:0;z-index:3;background:var(--paper);padding:1rem;border:1px solid var(--line);border-bottom:3px solid var(--accent)}
+.row{display:flex;gap:.75rem;align-items:end;flex-wrap:wrap}.field{flex:1;min-width:min(100%,19rem)}
+label{display:block;font-weight:650;margin-bottom:.25rem}select,input,button{font:inherit;border:1px solid #819a8e;border-radius:.25rem;padding:.5rem;min-height:2.75rem}
+input[type=checkbox]{min-height:0;accent-color:var(--accent);vertical-align:middle}select{width:100%;background:white;color:var(--ink)}button{background:var(--accent);color:white;padding-inline:1rem;font-weight:700;cursor:pointer}button:disabled{opacity:.55;cursor:wait}
+:focus-visible{outline:3px solid #9a5300;outline-offset:2px}#status{font-size:.8rem;margin:.5rem 0 0}
+section{margin-top:1.5rem}.grid{display:grid;gap:1rem;grid-template-columns:repeat(2,minmax(0,1fr))}
+article,.surface{background:var(--paper);border:1px solid var(--line);padding:1.25rem;border-radius:.3rem}
+.match-head{padding:1.5rem 0 1rem;border-bottom:1px solid var(--line)}.match-head h2{font-size:clamp(1.4rem,4vw,2rem)}.match-head p{margin-bottom:.25rem}
+#countdown{display:inline-block;background:#dcebdd;padding:.2rem .6rem;font-size:.85rem;font-weight:700}
+.filters{display:flex;align-items:center;gap:1rem;flex-wrap:wrap;margin:1rem 0;font-size:.875rem}.filters label{margin:0}.filters select{width:auto}
+.table{overflow:auto}table{border-collapse:collapse;width:100%;font-size:.875rem;font-variant-numeric:tabular-nums}th,td{border-bottom:1px solid var(--line);padding:.65rem;text-align:left}th{background:var(--wash);white-space:nowrap}td:first-child,td:nth-child(n+3){white-space:nowrap}a{color:var(--accent)}
+#comparison th,#comparison td{text-align:center}#comparison th:first-child,#comparison td:first-child{text-align:left}
+.metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,9rem),1fr));gap:.5rem;margin:1rem 0}.metrics>div{background:var(--wash);padding:.6rem}.metrics dt{font-size:.875rem}.metrics dd{margin:0;font-weight:700}.metrics small{font-size:.75rem}
+#coverage{display:grid;grid-template-columns:1fr 1fr;gap:1rem}#coverage p{margin:0}#coverage strong{display:block}
+#scoreAnalysis{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem}#scoreAnalysis>div+div{border-left:1px solid var(--line);padding-left:1.5rem}#scoreAnalysis textarea{display:block;width:100%;margin:.5rem 0;font:inherit}details{margin:.75rem 0}summary{cursor:pointer;font-weight:650}
+.meets-threshold{background:#d4efda;color:#153820}.below-threshold{background:#f8dcda;color:#54211e}
+.squad-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1rem}#lineups,#scorers{display:contents}#lineups>article:nth-child(1){grid-column:1;grid-row:1}#lineups>article:nth-child(2){grid-column:2;grid-row:1}#lineups>article:nth-child(n+3){grid-column:1/-1;grid-row:3}#scorers>article:nth-child(1){grid-column:1;grid-row:2}#scorers>article:nth-child(2){grid-column:2;grid-row:2}#scorers>p{grid-column:1/-1}#lineupSummary{margin-bottom:1rem}#scorers li{padding:.5rem 0;border-bottom:1px solid var(--line)}small{display:block;margin-top:.5rem;font-size:.8rem}
+@media(max-width:700px){.grid,.squad-grid,#scoreAnalysis{grid-template-columns:1fr}.squad-grid article{grid-column:auto!important;grid-row:auto!important}#lineups>article:nth-child(1){order:1}#scorers>article:nth-child(1){order:2}#lineups>article:nth-child(2){order:3}#scorers>article:nth-child(2){order:4}#lineups>article:nth-child(n+3){order:5}#scoreAnalysis>div+div{border-left:0;border-top:1px solid var(--line);padding:1rem 0 0}.controls{padding:.75rem}.controls .field{min-width:100%}.controls button{width:100%}}
+@media(max-width:700px){
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+body{font-size:16px;line-height:1.65}
+header{padding:1rem max(.75rem,env(safe-area-inset-left)) .5rem}
+header p{font-size:.85rem}h1{font-size:1.65rem}
+main{padding:0 max(.75rem,env(safe-area-inset-right)) max(2rem,env(safe-area-inset-bottom)) max(.75rem,env(safe-area-inset-left))}
+.controls{position:static;padding:.75rem}
+.controls .row{gap:.5rem}.controls .field{min-width:0;flex-basis:100%}
+select,input,button{font-size:16px;min-height:48px}
+.controls button{width:auto;min-width:8rem}
+#status{font-size:.8rem;line-height:1.5}
+.match-head{padding:1rem 0}.match-head h2{font-size:1.35rem}.match-head .note{font-size:.85rem}
+section{margin-top:1.25rem}h2{font-size:1.15rem}
+article,.surface{padding:.85rem;min-width:0}
+.note{font-size:.875rem}small{font-size:.8rem}
+#coverage{grid-template-columns:1fr;gap:.75rem}
+#coverage>div+div{border-top:1px solid var(--line);padding-top:.75rem}
+.filters{gap:.5rem .75rem;font-size:16px}.filters .note{flex-basis:100%}
+.filters input[type=checkbox]{width:20px;height:20px;min-height:20px}
+.filters label:has(input){display:flex;align-items:center;gap:.5rem;min-height:44px}
+#comparison{padding:.4rem;overflow:visible}
+#comparison table{table-layout:fixed;width:100%;font-size:14px}
+#comparison th,#comparison td{white-space:normal;overflow-wrap:anywhere;padding:.6rem .35rem;vertical-align:middle;line-height:1.5}
+#comparison th:first-child{width:38%}
+#comparison thead th{font-size:14px}
+#scorers ol,#lineups ol{padding-left:1.4rem}
+#scorers li{font-size:16px;line-height:1.7;overflow-wrap:anywhere}
+article a{overflow-wrap:anywhere}
+#recent .table,#same .table,#meetings .table{overscroll-behavior-x:contain}
+#recent table,#same table,#meetings table{font-size:14px}
+#scoreAnalysis{gap:1rem}#scoreAnalysis textarea{font-size:16px}
+}
+#markets table{table-layout:fixed}#markets th,#markets td{white-space:normal;text-align:center}#markets .main-line{background:#e5f0e7;font-weight:700}#markets small{margin-top:.5rem}
+</style>
+</head>
+<body>
+<header><div class="wrap"><p>香港賽馬會 · 足球研究</p><h1>足球場次研究台</h1></div></header>
+<main>
+<div class="controls">
+<div class="row"><div class="field"><label for="fixture">選擇場次</label><select id="fixture" disabled><option>載入後可選擇場次</option></select></div><button id="refresh" type="button">↻ REFRESH</button></div>
+<p id="status" role="status"></p>
+</div>
+<div id="details" hidden>
+<div class="match-head"><h2 id="selected"></h2><p id="meta" class="note"></p><p id="venue" class="note"></p><span id="countdown"></span></div>
+<section><h2>馬會大細盤</h2><p class="note">顯示在售盤線及報價時間，按 Refresh 更新。</p><div id="markets" class="grid" aria-live="polite"></div></section><div class="filters"><label for="sampleSize">近況樣本</label><select id="sampleSize"><option value="10">最近 10 場</option><option value="5">最近 5 場</option></select><label><input id="sameOnly" type="checkbox"> 只顯示今場賽項</label><span class="note">套用概覽、入球角球及近期交手</span></div>
+<div id="panel-overview">
+<section><h2>兩隊資料覆蓋</h2><div class="surface" id="coverage" aria-live="polite"></div></section>
+<section><h2>兩隊近況比較</h2><p class="note">每格列出數值同有效場數。場均全場總角球大過 9.5、半場大過 4.5 用綠底，低過用紅底，等於條線保留中性色；按未四捨五入均值比較。主隊主場、客隊作客只計所選近況樣本內嘅對應場次。</p><article id="comparison" class="table" aria-live="polite"></article></section>
+</div>
+<div id="panel-analysis">
+<section><h2>全場比分及角球分析</h2><p class="note">比分使用近期得失球作 Poisson 試算。角球顯示歷史均值同大細線場次比例，模型未經校準。</p><article id="scoreAnalysis" aria-live="polite"></article></section>
+</div>
+<div id="panel-squad">
+<section><h2>陣容及隊內射手</h2><p class="note">左邊主隊，右邊客隊。入球榜按今場賽項同球季，名單未公布時顯示未確認。</p><article id="lineupSummary" aria-live="polite"></article><div class="squad-grid"><div id="lineups" aria-live="polite"></div><div id="scorers" aria-live="polite"></div></div>
+<details class="surface"><summary>輪換分類點計</summary><p>比較最近 5 場有收錄嘅賽事，最少 3 場完整陣容。過半場次正選列為常用正選，最少 8 人先分類。缺 0–1 人屬接近常用正選，2–3 人屬部分輪換，4 人以上屬明顯輪換跡象。</p></details></section>
+</div>
+<div id="panel-history">
+<section><h2>近期賽果</h2><p class="note">每場按歷史主隊–客隊排列。綠底代表達到門檻，紅底代表低於門檻。半場／全場入球門檻 2／3，角球門檻 4／9。— 代表欠資料。</p><div class="grid" id="recent" aria-live="polite"></div></section>
+<section><h2>近期交手</h2><p class="note">由所選近況樣本擷取，重複場次只計一次。</p><article id="meetings" aria-live="polite"></article></section>
+<section><h2>同賽項 · 同賽季</h2><p id="seasonStatus" class="note" role="status"></p><div class="grid" id="same" aria-live="polite"></div></section>
+</div>
+</div>
+<section class="note">比分與角球來源 <a href="https://bet.hkjc.com/ch/football/home" target="_blank" rel="noopener">香港賽馬會足球</a>，只涵蓋馬會收錄場次。球員與陣容來源 ESPN，各區顯示資料覆蓋。</section>
+</main>
+<script type="module" src="app.js?v=classic1"></script>
+</body></html>

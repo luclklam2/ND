@@ -1,4 +1,4 @@
-import {createLineupService} from './lineup-data.js?v=4';
+import {createLineupService} from './lineup-data.js?v=6';
 import {teamStats,scalarTone,pairTone} from './stats.js?v=4';
 
 const endpoint='https://info.cld.hkjc.com/graphql/base/';

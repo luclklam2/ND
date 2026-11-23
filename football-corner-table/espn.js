@@ -5,7 +5,8 @@ const espnDay = new Intl.DateTimeFormat('en-CA', {
 const normalize = name => {
   const value = String(name ?? '').normalize('NFD').toLowerCase()
     .replace(/\p{M}/gu,'').replace(/\b(?:fc|cf|afc|sc|club)\b/g,'').replace(/[^a-z0-9]/g,'');
-  return value==='bilbao' ? 'athletic' : value;
+  const aliases={bilbao:'athletic',neftchifargona:'neftchifergana'};
+  return aliases[value] ?? value;
 };
 const names = team => [team?.displayName,team?.shortDisplayName,team?.name,team?.location]
   .map(normalize).filter(Boolean);

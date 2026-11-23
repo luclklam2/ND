@@ -1,4 +1,4 @@
-import {lookup} from './espn.js';
+import {lookup} from './espn.js?v=6';
 
 export function startingXI(roster){
   const players=roster?.roster?.filter(player=>player.starter===true) ?? [];

@@ -17,16 +17,18 @@ const queries=Promise.all(['footballMatchesQuery','historicFootballMatchesQuery'
 let controller;
 let generation=0;
 let filterDay='';
-const excluded=new Set();
+const selected=new Set();
+let initialized=false;
+let enqueueVisible=()=>{};
 const groups=new Map();
 const options=document.getElementById('fixture-options');
 function applyFixtures(){
   let shown=0;
   for(const [id,group] of groups){
-    const visible=!excluded.has(id);
+    const visible=selected.has(id);
     group.checkbox.checked=visible;
     for(const row of group.rows) row.hidden=!visible;
-    if(visible) shown++;
+    if(visible){shown++;enqueueVisible(group);}
   }
   document.getElementById('selection-count').textContent='顯示 '+shown+' / '+groups.size+' 場';
   document.getElementById('no-selection').hidden=shown>0 || groups.size===0;
@@ -43,7 +45,7 @@ function applyColumns(){
 for(const id of ['show-corners','show-goals']) document.getElementById(id).addEventListener('change',applyColumns);
 for(const [id,all] of [['select-all',true],['select-none',false]]){
   document.getElementById(id).addEventListener('click',()=>{
-    for(const key of groups.keys()) all?excluded.delete(key):excluded.add(key);
+    for(const key of groups.keys()) all?selected.add(key):selected.delete(key);
     applyFixtures();
   });
 }
@@ -140,84 +142,91 @@ async function load(){
   const run=++generation;
   const asOf=Date.now();
   const today=hkDay.format(asOf);
-  if(filterDay!==today){excluded.clear();filterDay=today;}
+  if(filterDay!==today){selected.clear();initialized=false;filterDay=today;}
+  enqueueVisible=()=>{};
   document.getElementById('date').textContent=today+' · 香港時間';
   body.replaceChildren();
   options.replaceChildren();groups.clear();applyFixtures();
   button.disabled=true;
-  status.textContent='正在讀取馬會今日場次…';
+  status.textContent='正在讀取馬會即將開賽場次…';
   try{
     const data=await request('footballMatchesQuery',{
-      fbOddsTypes:['HAD'],fbOddsTypesM:['HAD'],showAllMatch:false,
+      fbOddsTypes:['HAD'],fbOddsTypesM:['HAD'],showAllMatch:true,
       inplayOnly:false,featuredMatchesOnly:false,earlySettlementOnly:false
     },signal);
     const listed=data.matches;
     if(run!==generation) return;
     const matches=[...new Map(listed.filter(match=>match.homeTeam?.id && match.awayTeam?.id &&
-      !['MATCHENDED','INPLAYMATCHENDED'].includes(match.status) && Number.isFinite(Date.parse(match.kickOffTime)) && hkDay.format(Date.parse(match.kickOffTime))===today)
+      !['MATCHENDED','INPLAYMATCHENDED'].includes(match.status) && Number.isFinite(Date.parse(match.kickOffTime)) && (Date.parse(match.kickOffTime)>=asOf || hkDay.format(Date.parse(match.kickOffTime))===today))
       .map(match=>[match.id,match])).values()].sort((a,b)=>Date.parse(a.kickOffTime)-Date.parse(b.kickOffTime));
+    if(!initialized){for(const match of matches.slice(0,20)) selected.add(match.id);initialized=true;}
     body.replaceChildren();
     const jobs=[];
     for(const match of matches){
-      const group={rows:[]};groups.set(match.id,group);
+      const group={rows:[],jobs:[]};groups.set(match.id,group);
       const option=add(options,'label','');
-      const checkbox=add(option,'input','');checkbox.type='checkbox';checkbox.checked=!excluded.has(match.id);group.checkbox=checkbox;
-      add(option,'span',hkTime.format(Date.parse(match.kickOffTime))+' · '+(match.frontEndId || match.id)+' · '+name(match.homeTeam)+' vs '+name(match.awayTeam));
-      checkbox.addEventListener('change',()=>{checkbox.checked?excluded.delete(match.id):excluded.add(match.id);applyFixtures();});
+      const checkbox=add(option,'input','');checkbox.type='checkbox';checkbox.checked=selected.has(match.id);group.checkbox=checkbox;
+      add(option,'span',hkDay.format(Date.parse(match.kickOffTime)).slice(5)+' '+hkTime.format(Date.parse(match.kickOffTime))+' · '+(match.frontEndId || match.id)+' · '+name(match.homeTeam)+' vs '+name(match.awayTeam));
+      checkbox.addEventListener('change',()=>{checkbox.checked?selected.add(match.id):selected.delete(match.id);applyFixtures();});
       [match.homeTeam,match.awayTeam].forEach((team,i)=>{
         const row=add(body,'tr','');group.rows.push(row);
         if(i===0){
           const fixture=add(row,'th',match.frontEndId || match.id);
           fixture.className='match';fixture.rowSpan=2;fixture.scope='rowgroup';
-          add(fixture,'small',hkTime.format(Date.parse(match.kickOffTime))+' · '+(Date.parse(match.kickOffTime)<=asOf?(['MATCHENDED','INPLAYMATCHENDED'].includes(match.status)?'已完場':'已到開波時間'):'未開波'));
+          add(fixture,'small',hkDay.format(Date.parse(match.kickOffTime)).slice(5)+' '+hkTime.format(Date.parse(match.kickOffTime))+' · '+(Date.parse(match.kickOffTime)<=asOf?(['MATCHENDED','INPLAYMATCHENDED'].includes(match.status)?'已完場':'已到開波時間'):'未開波'));
           add(fixture,'div',name(match.homeTeam)+' vs '+name(match.awayTeam));
           add(fixture,'small',match.tournament?.name_ch || match.tournament?.name_en || '');
         }
         const label=add(row,'th',name(team));label.className='team';label.scope='row';
         add(label,'small',i===0?'主隊 · 主場拆分':'客隊 · 作客拆分');
-        const cells=Array.from({length:6},(_,index)=>{const cell=add(row,'td','讀取中…');cell.className='missing';cell.dataset.kind=[3,4].includes(index)?'goals':'corners';return cell;});
-        const lineupCells=Array.from({length:2},()=>{const cell=add(row,'td','讀取中…');cell.className='missing';return cell;});
-        jobs.push({team,match,cells,lineupCells,home:i===0});
+        const cells=Array.from({length:6},(_,index)=>{const cell=add(row,'td','勾選後讀取');cell.className='missing';cell.dataset.kind=[3,4].includes(index)?'goals':'corners';return cell;});
+        const lineupCells=Array.from({length:2},()=>{const cell=add(row,'td','勾選後讀取');cell.className='missing';return cell;});
+        const job={team,match,cells,lineupCells,home:i===0};
+        jobs.push(job);group.jobs.push(job);
       });
     }
-    applyFixtures();applyColumns();
-    if(!matches.length){status.textContent='今日暫無未完場馬會場次 · 更新 '+hkFull.format(asOf);return;}
-    let completed=0,failed=0,lineupsCompleted=0;
+    if(!matches.length){applyFixtures();status.textContent='暫無可用嘅未完場馬會場次 · 更新 '+hkFull.format(asOf);return;}
+    let completed=0,failed=0,lineupsCompleted=0,active=0;
     const loadLineups=createLineupService(signal);
-    const cache=new Map();
-    const progress=()=>{status.textContent=matches.length+' 場 · 已完成 '+completed+'/'+jobs.length+' 隊 · 陣容 '+lineupsCompleted+'/'+jobs.length+' 隊'+(failed?' · '+failed+' 隊讀取失敗，可 Refresh 重試':'')+' · 讀取 '+hkFull.format(asOf);};
-    progress();
+    const cache=new Map(),queue=[];
+    const progress=()=>{status.textContent=matches.length+' 場可選 · 數據 '+completed+'/'+queue.length+' 隊 · 陣容已查 '+lineupsCompleted+'/'+queue.length+' 隊'+(failed?' · '+failed+' 隊讀取失敗，可 Refresh 重試':'')+' · 讀取 '+hkFull.format(asOf);};
     let next=0;
-    async function worker(){
-      while(next<jobs.length && !signal.aborted){
-        const job=jobs[next++];
-        try{
-          const key=job.team.id+'|'+Math.min(asOf,Date.parse(job.match.kickOffTime));
-          if(!cache.has(key)) cache.set(key,history(job.team,job.match,asOf,signal));
-          job.historyPromise=cache.get(key);
-          const rows=await job.historyPromise;
-          if(run!==generation || signal.aborted) return;
-          render(job.cells,teamStats(rows,job.team.id,job.home));
-        }catch(error){
-          if(run!==generation || signal.aborted) return;
-          failed++;
-          for(const cell of job.cells){cell.replaceChildren();cell.className='missing';add(cell,'div','讀取失敗');cell.title=error.message;}
-        }
-        completed++;progress();
+    async function process(job){
+      try{
+        const key=job.team.id+'|'+Math.min(asOf,Date.parse(job.match.kickOffTime));
+        if(!cache.has(key)) cache.set(key,history(job.team,job.match,asOf,signal));
+        job.historyPromise=cache.get(key);
+        const rows=await job.historyPromise;
+        if(run!==generation || signal.aborted) return;
+        render(job.cells,teamStats(rows,job.team.id,job.home));
+      }catch(error){
+        if(run!==generation || signal.aborted) return;
+        failed++;
+        for(const cell of job.cells){cell.replaceChildren();cell.className='missing';add(cell,'div','讀取失敗');cell.title=error.message;}
+      }
+      completed++;progress();
+      await loadLineups(job,job.historyPromise);
+      if(signal.aborted || run!==generation) return;
+      lineupsCompleted++;progress();
+    }
+    function pump(){
+      if(signal.aborted || run!==generation) return;
+      while(active<3 && next<queue.length){
+        const job=queue[next++];active++;
+        process(job).finally(()=>{active--;pump();});
       }
     }
-    await Promise.all(Array.from({length:Math.min(3,jobs.length)},worker));
-    if(signal.aborted || run!==generation) return;
-    next=0;
-    async function lineupWorker(){
-      while(next<jobs.length && !signal.aborted){
-        const job=jobs[next++];
-        await loadLineups(job,job.historyPromise);
-        if(signal.aborted || run!==generation) return;
-        lineupsCompleted++;progress();
+    enqueueVisible=group=>{
+      if(signal.aborted || run!==generation) return;
+      for(const job of group.jobs){
+        if(job.queued) continue;
+        job.queued=true;queue.push(job);
+        for(const cell of [...job.cells,...job.lineupCells]) cell.textContent='讀取中…';
       }
-    }
-    await Promise.all(Array.from({length:Math.min(3,jobs.length)},lineupWorker));
+      progress();pump();
+    };
+    applyFixtures();applyColumns();
+
   }catch(error){
     if(run===generation && !signal.aborted) status.textContent='更新失敗 · '+error.message+'。請按 Refresh 重試。';
   }finally{

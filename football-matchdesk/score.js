@@ -114,7 +114,9 @@ export async function showScoreAnalysis(target,match,histories,signal) {
   }
   const [homeRows,awayRows] = results.map(row=>row.value);
   const goals = add(target,'div','');
-  const corners = add(target,'div','');
+  const cornerColumn = add(target,'div','');
+  const corners = add(cornerColumn,'details','');
+  add(corners,'summary','角球詳細樣本及其他盤線');
   showCorners(corners,match,homeRows,awayRows);
   target = goals;
   const analysis = scoreAnalysis(match,homeRows,awayRows);

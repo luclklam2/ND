@@ -1,9 +1,9 @@
-import { showExpanded } from './expanded.js?v=20261123summary';
-import { setMatchOverview, showComparison } from './view.js?v=20261123summary';
-import { showScorers } from './scorers.js?v=20261123summary';
-import { showScoreAnalysis } from './score.js?v=20261123summary';
+import { showExpanded } from './expanded.js?v=20261123tidy';
+import { setMatchOverview, showComparison } from './view.js?v=20261123tidy';
+import { showScorers } from './scorers.js?v=20261123tidy';
+import { showScoreAnalysis } from './score.js?v=20261123tidy';
 import { formatResult, resultTotal, summarize } from './form.js';
-import { lookup, showLineups } from './lineups.js?v=20261123summary';
+import { lookup, showLineups } from './lineups.js?v=20261123tidy';
 import { inSeason, seasonSchedules } from './season.js';
 const endpoint = 'https://info.cld.hkjc.com/graphql/base/';
 const element = id => document.getElementById(id);

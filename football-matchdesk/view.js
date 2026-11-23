@@ -1,4 +1,4 @@
-import { summarize, resultTotal, confirmedResult } from './form.js';
+import { summarize, resultTotal } from './form.js';
 
 const add = (parent,tag,text)=>{
   const node=document.createElement(tag);
@@ -75,22 +75,6 @@ export async function showComparison(match,histories,signal,scheduleHistories=hi
     add(row,'th',label).scope='row';
     values.forEach(value=>add(row,'td',value));
   };
-  const proportion=(rows,test,type=1,stage=5)=>{
-    if (!rows) return '讀取失敗';
-    const values=rows.map(row=>confirmedResult(row,type,stage)).filter(record=>
-      record && (type===2 ? Number.isInteger(record.ttlCornerResult) && record.ttlCornerResult>=0 :
-      [record.homeResult,record.awayResult].every(n=>Number.isInteger(n) && n>=0)));
-    // Corner results may provide a pair without a separate total.
-    const totals=type===2 ? rows.map(row=>resultTotal(row,2,stage)).filter(value=>value!==null) : values;
-    if (!totals.length) return '欠有效樣本';
-    const count=totals.filter(test).length;
-    return count+'/'+totals.length+' 場 · '+(count/totals.length*100).toFixed(0)+'%';
-  };
-  appendMetric('全場大 2.5',samples.map(rows=>proportion(rows,r=>r.homeResult+r.awayResult>2.5)));
-  appendMetric('全場大 3.5',samples.map(rows=>proportion(rows,r=>r.homeResult+r.awayResult>3.5)));
-  appendMetric('兩隊都有入球',samples.map(rows=>proportion(rows,r=>r.homeResult>0 && r.awayResult>0)));
-  appendMetric('全場角球大 9.5',samples.map(rows=>proportion(rows,total=>total>9.5,2,5)));
-  appendMetric('半場角球大 4.5',samples.map(rows=>proportion(rows,total=>total>4.5,2,3)));
   appendMetric('主場／作客角球取得／失去',samples.map((rows,i)=>{
     if (!rows) return '讀取失敗';
     const split=rows.filter(row=>(row.homeTeam.id===teams[i].id)===(i===0));

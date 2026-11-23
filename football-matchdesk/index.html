@@ -66,6 +66,22 @@ article a{overflow-wrap:anywhere}
 #quickSummary th:first-child{width:25%}
 #quickSummary small{margin-top:.25rem}
 @media(max-width:700px){#quickSummary table{font-size:14px}}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang TC","Microsoft JhengHei",sans-serif;line-height:1.65}
+main,.wrap{max-width:74rem}
+h1,h2,h3{line-height:1.4}h2{font-size:1.2rem;letter-spacing:.02em}
+section{margin-top:1.75rem}article p{margin-bottom:.75rem}
+table,.metrics,#countdown{font-variant-numeric:tabular-nums}
+td{line-height:1.55}small,.note{line-height:1.65}
+#quickSummary>.grid{gap:1rem}
+#quickSummary .surface>h3{font-size:1.05rem}
+#quickSummary .surface>p{font-size:1rem;font-weight:650}
+#quickSummary .surface>small{font-size:.8rem}
+.data-coverage{margin-top:1rem}
+details.surface>summary{padding:.25rem 0}
+#scoreAnalysis{display:block}#scoreAnalysis>div+div{border-left:0;border-top:1px solid var(--line);padding:1rem 0 0;margin-top:1rem}
+#expanded h3{margin-top:1.5rem}
+#expanded details{border-bottom:1px solid var(--line);padding:.5rem 0}
+@media(max-width:700px){h2{font-size:1.15rem}section{margin-top:1.4rem}#quickSummary th,#quickSummary td{padding:.65rem .25rem;font-size:14px}#quickSummary small{font-size:12px}#expanded table{font-size:14px}#scoreAnalysis{display:block}#scoreAnalysis>div+div{margin-top:1rem}}
 </style>
 </head>
 <body>
@@ -77,13 +93,13 @@ article a{overflow-wrap:anywhere}
 </div>
 <div id="details" hidden>
 <div class="match-head"><h2 id="selected"></h2><p id="meta" class="note"></p><p id="venue" class="note"></p><span id="countdown"></span></div>
-<section><h2>Summary · 入球與角球大細</h2><div id="quickSummary" aria-live="polite"></div></section><div class="filters"><label for="sampleSize">近況樣本</label><select id="sampleSize"><option value="10">最近 10 場</option><option value="5">最近 5 場</option><option value="15">最近 15 場</option><option value="20">最近 20 場</option></select><label><input id="sameOnly" type="checkbox"> 只顯示今場賽項</label><span class="note">套用概覽、入球角球及近期交手</span></div>
+<section><h2>賽事摘要 · 入球與角球</h2><div id="quickSummary" aria-live="polite"></div></section><div class="filters"><label for="sampleSize">近況樣本</label><select id="sampleSize"><option value="10">最近 10 場</option><option value="5">最近 5 場</option><option value="15">最近 15 場</option><option value="20">最近 20 場</option></select><label><input id="sameOnly" type="checkbox"> 只顯示今場賽項</label><span class="note">套用概覽、入球角球及近期交手</span></div>
 <div id="panel-overview">
-<section><h2>兩隊資料覆蓋</h2><div class="surface" id="coverage" aria-live="polite"></div></section>
-<section><h2>兩隊近況比較</h2><p class="note">每格列出數值同有效場數。場均全場總角球大過 9.5、半場大過 4.5 用綠底，低過用紅底，等於條線保留中性色；按未四捨五入均值比較。主隊主場、客隊作客只計所選近況樣本內嘅對應場次。</p><article id="comparison" class="table" aria-live="polite"></article></section>
+<details class="surface data-coverage"><summary>資料來源及樣本日期</summary><div id="coverage" aria-live="polite"></div></details>
+<section><h2>兩隊近況比較</h2><p class="note">角球均值高於全場 9.5／半場 4.5 用綠底，低於用紅底。主客拆分只計所選樣本內嘅對應場次。</p><article id="comparison" class="table" aria-live="polite"></article></section>
 </div>
 <section><h2>同季攻守配對及實際大細盤</h2><article id="expanded" aria-live="polite"></article></section><div id="panel-analysis">
-<section><h2>全場比分及角球分析</h2><p class="note">比分使用近期得失球作 Poisson 試算。角球顯示歷史均值同大細線場次比例，模型未經校準。</p><article id="scoreAnalysis" aria-live="polite"></article></section>
+<section><h2>比分參考</h2><p class="note">按近期得失球試算，模型未經回測校準。角球詳細樣本可展開查看。</p><article id="scoreAnalysis" aria-live="polite"></article></section>
 </div>
 <div id="panel-squad">
 <section><h2>陣容及隊內射手</h2><p class="note">左邊主隊，右邊客隊。入球榜按今場賽項同球季，名單未公布時顯示未確認。</p><article id="lineupSummary" aria-live="polite"></article><div class="squad-grid"><div id="lineups" aria-live="polite"></div><div id="scorers" aria-live="polite"></div></div>
@@ -92,10 +108,10 @@ article a{overflow-wrap:anywhere}
 <div id="panel-history">
 <section><h2>近期賽果</h2><p class="note">每場按歷史主隊–客隊排列。綠底代表達到門檻，紅底代表低於門檻。半場／全場入球門檻 2／3，角球門檻 4／9。— 代表欠資料。</p><div class="grid" id="recent" aria-live="polite"></div></section>
 <section><h2>近期交手</h2><p class="note">由所選近況樣本擷取，重複場次只計一次。</p><article id="meetings" aria-live="polite"></article></section>
-<section><h2>同賽項 · 同賽季</h2><p id="seasonStatus" class="note" role="status"></p><div class="grid" id="same" aria-live="polite"></div></section>
+<section><details class="surface"><summary>同賽項 · 同季完整賽果</summary><p id="seasonStatus" class="note" role="status"></p><div class="grid" id="same" aria-live="polite"></div></details></section>
 </div>
 </div>
 <section class="note">比分與角球來源 <a href="https://bet.hkjc.com/ch/football/home" target="_blank" rel="noopener">香港賽馬會足球</a>，只涵蓋馬會收錄場次。球員與陣容來源 ESPN，各區顯示資料覆蓋。</section>
 </main>
-<script type="module" src="app.js?v=20261123summary"></script>
+<script type="module" src="app.js?v=20261123tidy"></script>
 </body></html>

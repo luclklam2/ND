@@ -99,21 +99,22 @@ export async function showExpanded(match,histories,confirmed,signal) {
     const size=Number(select.value);
     const selected=rows.map(team=>team.slice(0,size));
     for(const [code,[label,type,stage]] of Object.entries(markets)){
-      add(content,'h3',label+' · 近 5／10／15／20 場');
+      add(content,'h3',label+' · 近 '+size+' 場攻守配對');
       const wrap=add(content,'div','');wrap.className='table';
       const table=add(wrap,'table','');
       const head=add(table,'thead',''), tr=add(head,'tr','');
       ['範圍','主隊主場取得／失去','客隊作客取得／失去','攻守配對均值（主／客／合計）'].forEach(text=>add(tr,'th',text).scope='col');
       const body=add(table,'tbody','');
-      for(const n of [5,10,15,20]){
-        const h=splitStats(rows[0].slice(0,n),match.homeTeam.id,true,type,stage);
-        const a=splitStats(rows[1].slice(0,n),match.awayTeam.id,false,type,stage);
-        const pair=pairRates(h,a);
-        const row=add(body,'tr','');
-        add(row,'th','近 '+n+' 場（實得 '+Math.min(n,rows[0].length)+'／'+Math.min(n,rows[1].length)+'）').scope='row';
-        for(const stat of [h,a]) add(row,'td',stat.n?stat.scored.toFixed(2)+'／'+stat.conceded.toFixed(2)+' · '+stat.n+' 場':'欠分隊樣本');
-        add(row,'td',pair?[pair.home,pair.away,pair.home+pair.away].map(n=>n.toFixed(2)).join('／'):'每隊相關主客樣本最少 3 場');
-      }
+      const n=size;
+      const h=splitStats(rows[0].slice(0,n),match.homeTeam.id,true,type,stage);
+      const a=splitStats(rows[1].slice(0,n),match.awayTeam.id,false,type,stage);
+      const pair=pairRates(h,a);
+      const row=add(body,'tr','');
+      add(row,'th','近 '+n+' 場（實得 '+Math.min(n,rows[0].length)+'／'+Math.min(n,rows[1].length)+'）').scope='row';
+      for(const stat of [h,a]) add(row,'td',stat.n?stat.scored.toFixed(2)+'／'+stat.conceded.toFixed(2)+' · '+stat.n+' 場':'欠分隊樣本');
+      add(row,'td',pair?[pair.home,pair.away,pair.home+pair.away].map(n=>n.toFixed(2)).join('／'):'每隊相關主客樣本最少 3 場');
+      const quotesPanel=add(content,'details','');
+      add(quotesPanel,'summary','其他盤線及歷史比例');
       const pools=(match.foPools ?? []).filter(pool=>pool.oddsType===code && pool.status==='SELLINGSTARTED');
       let quotes=0;
       for(const pool of pools) for(const line of pool.lines ?? []){
@@ -121,7 +122,7 @@ export async function showExpanded(match,histories,confirmed,signal) {
         const selections=(line.combinations ?? []).filter(c=>c.status==='AVAILABLE' && Number(c.currentOdds)>1);
         if(!selections.length) continue;
         quotes++;
-        const box=add(content,'p',label+' '+line.condition+(line.main?'（主盤）':'')+' · '+selections.map(c=>(c.str==='H'?'大':c.str==='L'?'細':c.str)+' @ '+c.currentOdds).join(' ／ '));
+        const box=add(quotesPanel,'p',label+' '+line.condition+(line.main?'（主盤）':'')+' · '+selections.map(c=>(c.str==='H'?'大':c.str==='L'?'細':c.str)+' @ '+c.currentOdds).join(' ／ '));
         const time=Date.parse(pool.updateAt);
         add(box,'small',Number.isFinite(time)?'馬會報價更新 '+new Intl.DateTimeFormat('zh-HK',{timeZone:'Asia/Hong_Kong',dateStyle:'short',timeStyle:'short'}).format(time):'馬會未提供報價時間');
         selected.forEach((team,i)=>{
@@ -129,7 +130,7 @@ export async function showExpanded(match,histories,confirmed,signal) {
           add(box,'small',(i?'客隊':'主隊')+'所選近況 · '+(distribution?distribution.n+' 場，大 '+(distribution.over*100).toFixed(0)+'%／細 '+(distribution.under*100).toFixed(0)+'%／走 '+(distribution.push*100).toFixed(0)+'%':'欠樣本'));
         });
       }
-      if(!quotes) add(content,'p','馬會暫未提供在售'+label+'盤。');
+      if(!quotes) add(quotesPanel,'p','馬會暫未提供在售'+label+'盤。');
     }
     add(content,'small','攻守配對取主隊主場取得與客隊作客失去嘅平均，客隊反向計。比例屬歷史樣本，分盤按兩條線各半計；今場機率及賠率優勢尚未校準。');
   }

@@ -22,6 +22,33 @@ let initialized=false;
 let enqueueVisible=()=>{};
 const groups=new Map();
 const options=document.getElementById('fixture-options');
+const dateGroups=new Map();
+const search=document.getElementById('fixture-search');
+const dateSelect=document.getElementById('fixture-date');
+const selectedOnly=document.getElementById('selected-only');
+function applyOptionFilter(){
+  const query=search.value.trim().toLocaleLowerCase();
+  let visible=0;
+  for(const [id,group] of groups){
+    group.option.hidden=!!((dateSelect.value && group.day!==dateSelect.value) || (selectedOnly.checked && !selected.has(id)) || (query && !group.search.includes(query)));
+    if(!group.option.hidden) visible++;
+  }
+  for(const [day,section] of dateGroups){
+    const entries=[...groups.values()].filter(group=>group.day===day);
+    section.node.hidden=entries.every(group=>group.option.hidden);
+    section.count.textContent=entries.filter(group=>selected.has(group.match.id)).length+' / '+entries.length+' 場已選';
+  }
+  document.getElementById('filter-empty').hidden=visible>0 || groups.size===0;
+  document.getElementById('filter-results').textContent=groups.size?'清單 '+visible+' 場':'';
+}
+search.addEventListener('input',applyOptionFilter);
+dateSelect.addEventListener('change',applyOptionFilter);
+selectedOnly.addEventListener('change',applyOptionFilter);
+document.getElementById('nearest-twenty').addEventListener('click',()=>{
+  selected.clear();
+  for(const id of [...groups.keys()].slice(0,20)) selected.add(id);
+  applyFixtures();
+});
 function applyFixtures(){
   let shown=0;
   for(const [id,group] of groups){
@@ -33,6 +60,7 @@ function applyFixtures(){
   document.getElementById('selection-count').textContent='顯示 '+shown+' / '+groups.size+' 場';
   document.getElementById('no-selection').hidden=shown>0 || groups.size===0;
   document.getElementById('comparison').hidden=shown===0;
+  applyOptionFilter();
 }
 function applyColumns(){
   const corners=document.getElementById('show-corners').checked;
@@ -146,7 +174,7 @@ async function load(){
   enqueueVisible=()=>{};
   document.getElementById('date').textContent=today+' · 香港時間';
   body.replaceChildren();
-  options.replaceChildren();groups.clear();applyFixtures();
+  options.replaceChildren();groups.clear();dateGroups.clear();applyFixtures();
   button.disabled=true;
   status.textContent='正在讀取馬會即將開賽場次…';
   try{
@@ -162,11 +190,27 @@ async function load(){
     if(!initialized){for(const match of matches.slice(0,20)) selected.add(match.id);initialized=true;}
     body.replaceChildren();
     const jobs=[];
+    const previousDate=dateSelect.value;
+    dateSelect.replaceChildren();const allDates=add(dateSelect,'option','所有日期');allDates.value='';
     for(const match of matches){
-      const group={rows:[],jobs:[]};groups.set(match.id,group);
-      const option=add(options,'label','');
+      const day=hkDay.format(Date.parse(match.kickOffTime));
+      if(!dateGroups.has(day)){
+        const section=add(options,'section','');section.className='fixture-day';
+        const heading=add(section,'div','');heading.className='date-heading';
+        const dayLabel=(day===today?'今日 · ':day===hkDay.format(asOf+dayMs)?'聽日 · ':'')+day.slice(5).replace('-',' / ');
+        add(heading,'h2',dayLabel);
+        const count=add(heading,'small','');
+        const grid=add(section,'div','');grid.className='fixture-grid';
+        dateGroups.set(day,{node:section,grid,count});
+        const choice=add(dateSelect,'option',dayLabel);choice.value=day;
+      }
+      const group={rows:[],jobs:[],day,match};groups.set(match.id,group);
+      const option=add(dateGroups.get(day).grid,'label','');option.className='fixture-choice';group.option=option;
+      group.search=[match.frontEndId,match.id,match.homeTeam.name_ch,match.homeTeam.name_en,match.awayTeam.name_ch,match.awayTeam.name_en,match.tournament?.name_ch,match.tournament?.name_en].filter(Boolean).join(' ').toLocaleLowerCase();
       const checkbox=add(option,'input','');checkbox.type='checkbox';checkbox.checked=selected.has(match.id);group.checkbox=checkbox;
-      add(option,'span',hkDay.format(Date.parse(match.kickOffTime)).slice(5)+' '+hkTime.format(Date.parse(match.kickOffTime))+' · '+(match.frontEndId || match.id)+' · '+name(match.homeTeam)+' vs '+name(match.awayTeam));
+      const text=add(option,'span','');text.className='fixture-copy';
+      add(text,'small',hkTime.format(Date.parse(match.kickOffTime))+' · '+(match.frontEndId || match.id)+' · '+(match.tournament?.name_ch || match.tournament?.name_en || ''));
+      add(text,'span',name(match.homeTeam)+' vs '+name(match.awayTeam));
       checkbox.addEventListener('change',()=>{checkbox.checked?selected.add(match.id):selected.delete(match.id);applyFixtures();});
       [match.homeTeam,match.awayTeam].forEach((team,i)=>{
         const row=add(body,'tr','');group.rows.push(row);
@@ -185,6 +229,7 @@ async function load(){
         jobs.push(job);group.jobs.push(job);
       });
     }
+    dateSelect.value=dateGroups.has(previousDate)?previousDate:'';
     if(!matches.length){applyFixtures();status.textContent='暫無可用嘅未完場馬會場次 · 更新 '+hkFull.format(asOf);return;}
     let completed=0,failed=0,lineupsCompleted=0,active=0;
     const loadLineups=createLineupService(signal);

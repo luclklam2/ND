@@ -1,8 +1,9 @@
-import { setMatchOverview, showComparison } from './view.js?v=20261120data';
-import { showScorers } from './scorers.js?v=20261120data';
-import { showScoreAnalysis } from './score.js?v=20261120data';
+import { showExpanded } from './expanded.js?v=20261123';
+import { setMatchOverview, showComparison } from './view.js?v=20261123';
+import { showScorers } from './scorers.js?v=20261123';
+import { showScoreAnalysis } from './score.js?v=20261123';
 import { formatResult, resultTotal, summarize } from './form.js';
-import { lookup, showLineups } from './lineups.js?v=20261120data';
+import { lookup, showLineups } from './lineups.js?v=20261123';
 import { inSeason, seasonSchedules } from './season.js';
 const endpoint = 'https://info.cld.hkjc.com/graphql/base/';
 const element = id => document.getElementById(id);
@@ -45,7 +46,7 @@ async function loadFixtures() {
   status.textContent = '正在更新馬會場次…';
   try {
     const data = await request('footballMatchesQuery', {
-      fbOddsTypes:['HAD'],fbOddsTypesM:['HAD'],showAllMatch:false,
+      fbOddsTypes:['HAD','HIL','FHL','CHL','FCH'],fbOddsTypesM:['HAD'],showAllMatch:false,
       inplayOnly:false,featuredMatchesOnly:false,earlySettlementOnly:false
     }, new AbortController().signal);
     const previous = fixture.value;
@@ -98,10 +99,10 @@ async function history(team, match, start, sameSeason, signal) {
           && kickoff(row) <= Date.now() && [row.homeTeam?.id,row.awayTeam?.id].includes(team.id)
           && (!sameSeason || row.tournament?.code === match.tournament.code)) unique.set(row.id,row);
     }
-    if (!sameSeason && unique.size >= 10) break;
+    if (!sameSeason && unique.size >= 20) break;
   }
   const sorted = [...unique.values()].sort((a,b)=>kickoff(b)-kickoff(a));
-  return sameSeason ? sorted : sorted.slice(0,10);
+  return sameSeason ? sorted : sorted.slice(0,20);
 }
 
 function add(parent, tag, value) {
@@ -247,7 +248,7 @@ async function showSeason(match,start,signal,getMatch) {
     const rows = await history(team,match,first,true,signal);
     return schedule ? inSeason(rows,schedule.events) : rows;
   });
-  await loadPanels(target,match,start,true,signal,histories);
+  await Promise.all([loadPanels(target,match,start,true,signal,histories),showExpanded(match,histories,Boolean(schedules),signal)]);
 }
 
 async function selectFixture() {
@@ -263,6 +264,7 @@ async function selectFixture() {
   const venue = match.venue?.name_ch || match.venue?.name_en;
   element('venue').textContent = venue ? '球場 '+venue : '馬會場次資料暫未有球場';
   showMeetings(match, [], selection.signal, true);
+  element('expanded').textContent = '正在核對同球季資料…';
   element('meta').textContent =[match.frontEndId,match.tournament?.name_ch || match.tournament?.name_en,localTime.format(kickoff(match))+' 香港時間'].filter(Boolean).join(' · ');
   const start = dayStart(localDay.format(Math.min(Date.now(),kickoff(match))))-359*dayMs;
   const signal = selection.signal;

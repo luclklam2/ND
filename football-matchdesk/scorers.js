@@ -16,6 +16,13 @@ export function rankedScorers(athletes) {
     players:available.filter(player=>player.goals>0).sort((a,b)=>b.goals-a.goals || a.name.localeCompare(b.name)).slice(0,5)};
 }
 
+export function shotLeaders(athletes) {
+  return athletes.flatMap(player=>{
+    const shots=player.statistics?.splits?.categories?.flatMap(category=>category.stats ?? []).find(stat=>stat.name==='totalShots')?.value;
+    return player.id && player.displayName && Number.isInteger(shots) && shots>=0
+      ? [{id:String(player.id),name:player.displayName,shots}] : [];
+  }).sort((a,b)=>b.shots-a.shots || a.name.localeCompare(b.name));
+}
 export function attendance(id,roster) {
   const entries = roster?.roster ?? [];
   const starters = entries.filter(player=>player.starter===true);
@@ -82,6 +89,22 @@ export async function showScorers(target,match,signal,getMatch) {
             .find(value=>/^\d{1,3}$/.test(String(value ?? '')));
           const shirt = number===undefined ? '號碼未提供' : '#'+number;
           add(list,'li',shirt+' '+player.name+' · '+player.goals+' 球 · '+attendance(player.id,roster));
+        }
+
+        const shooters=shotLeaders(payload.athletes);
+        add(card,'h3','隊內射門最多兩人');
+        add(card,'small','有射門統計 '+shooters.length+'/'+payload.athletes.length+' 名球員；同數按姓名排序，以下按現有數據排名。');
+        if(!shooters.length) add(card,'p','ESPN 未提供球員射門統計。');
+        for(const player of shooters.filter(player=>player.shots>0).slice(0,2)){
+          const state=attendance(player.id,roster);
+          const line=add(card,'p',player.name+' · '+player.shots+' 次射門 · '+state);
+          if(state==='未見列入今場名單') {
+            line.textContent='⚠ 射門主力未列名 · '+line.textContent;
+            line.className='alert alert-danger';
+          } else if(state==='今場後備') {
+            line.textContent='⚠ 射門主力未正選 · '+line.textContent;
+            line.className='alert';
+          }
         }
         const link = add(card,'a','ESPN 球隊統計');
         link.href = 'https://www.espn.com/soccer/team/stats/_/id/'+team.id+'/league/'+league+'/season/'+season;

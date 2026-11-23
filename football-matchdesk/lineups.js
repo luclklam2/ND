@@ -174,6 +174,7 @@ export async function showLineups(target,match,histories,signal,getMatch=lookup(
         return {name,lineup,coverage,reason:comparison?'常用正選少於 8 人，暫未能分類。':'近期正選樣本不足，暫未能判斷輪換。'};
       }
       const {regular,missing,label} = comparison;
+      if (missing.length>4) append(card,'p','⚠ 常用正選有 '+missing.length+' 人今場未正選，輪換超過 4 人。').className='alert alert-danger';
       verdict.textContent = label+' · '+(regular.length-missing.length)+'/'+regular.length+' 名常用正選今場正選。'+coverage;
       if (missing.length) append(card,'p','今場未列入正選：'+missing.map(({athlete})=>athlete.displayName).join('、'));
       return {name,lineup,comparison,coverage};

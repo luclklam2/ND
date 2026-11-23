@@ -110,6 +110,6 @@ export async function showComparison(match,histories,signal,scheduleHistories=hi
     if (!rows) return '讀取失敗';
     const start=Date.parse(match.kickOffTime)-14*86400000;
     const count=rows.filter(row=>Date.parse(row.kickOffTime)>=start && Date.parse(row.kickOffTime)<cutoff).length;
-    return (count>=10?'至少 ':'')+count+' 場 · 馬會近 10 場收錄範圍';
+    return (count>=20?'至少 ':'')+count+' 場 · 馬會近 20 場收錄範圍';
   }));
-  add(target,'small','比例係所選歷史樣本。賽程負荷使用未經賽項篩選嘅近 10 場已完場紀錄；今場前尚未完成嘅賽事未計入。');}
+  add(target,'small','比例係所選歷史樣本。賽程負荷使用未經賽項篩選嘅近 20 場已完場紀錄；今場前尚未完成嘅賽事未計入。');}
